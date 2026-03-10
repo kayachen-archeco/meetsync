@@ -133,6 +133,47 @@ textarea { resize: vertical; min-height: 68px; }
 .btn-main:hover { background: var(--accent2); transform: translateY(-1px); }
 .btn-main:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
+/* ── SLOTS ── */
+.slot-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 10px;
+  align-items: end;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  animation: pop 0.2s ease;
+}
+.slot-num {
+  grid-column: 1 / -1;
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent2); margin-bottom: 2px;
+}
+.slot-del {
+  width: 32px; height: 32px;
+  border-radius: 8px; border: 1px solid var(--border2);
+  background: none; color: var(--text3);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; transition: all 0.2s; flex-shrink: 0;
+  align-self: end;
+}
+.slot-del:hover { border-color: var(--red); color: var(--red); }
+.btn-add-slot {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 14px; border-radius: 9px;
+  border: 1px dashed var(--border2);
+  background: none; color: var(--text3);
+  font-family: 'Outfit',sans-serif; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  width: 100%; justify-content: center;
+  margin-bottom: 11px;
+}
+.btn-add-slot:hover { border-color: var(--accent); color: var(--accent); }
+.btn-add-slot:disabled { opacity: 0.35; cursor: not-allowed; }
+
 .spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -220,15 +261,33 @@ textarea { resize: vertical; min-height: 68px; }
       <input type="text" id="fTitle" placeholder="例：UXレビュー — クライアント名" disabled />
     </div>
   </div>
-  <div class="fields-grid r3" style="margin-bottom:11px;">
-    <div class="f"><label>日付 *</label><input type="date" id="fDate" disabled /></div>
-    <div class="f"><label>開始時間 *</label><input type="time" id="fStart" disabled /></div>
-    <div class="f"><label>終了時間 *</label><input type="time" id="fEnd" disabled /></div>
-  </div>
+  <!-- 日程スロット -->
+  <div id="slotList"></div>
+  <button class="btn-add-slot" id="btnAddSlot" onclick="addSlot()" disabled>＋ 日程を追加</button>
   <div class="fields-grid r1">
     <div class="f">
       <label>アジェンダ / メモ</label>
       <textarea id="fDesc" placeholder="会議の目的や議題など（任意）" disabled></textarea>
+    </div>
+  </div>
+  <div class="fields-grid r1" style="margin-top:11px; margin-bottom:11px;">
+    <div class="f">
+      <label>繰り返し</label>
+      <select id="fRecur" disabled>
+        <option value="none">繰り返しなし</option>
+        <option value="daily">毎日</option>
+        <option value="weekly">毎週</option>
+        <option value="biweekly">隔週</option>
+        <option value="monthly">毎月</option>
+      </select>
+    </div>
+  </div>
+  <div id="recurOptions" style="display:none; margin-bottom:11px;">
+    <div class="fields-grid r1">
+      <div class="f">
+        <label>終了日</label>
+        <input type="date" id="fRecurEnd" disabled />
+      </div>
     </div>
   </div>
 
@@ -274,20 +333,30 @@ textarea { resize: vertical; min-height: 68px; }
         <div class="res-sub">Zoom URL生成 · カレンダー登録 完了</div>
       </div>
     </div>
-    <div class="res-grid">
-      <div class="res-item"><div class="res-lbl">📋 タイトル</div><div class="res-val" id="rTitle">—</div></div>
-      <div class="res-item"><div class="res-lbl">🕐 日時</div><div class="res-val" id="rDT">—</div></div>
+    <div style="margin-bottom:12px;">
+      <div class="res-lbl">📋 タイトル</div>
+      <div class="res-val" id="rTitle" style="font-size:1rem;font-weight:700;margin-top:3px;">—</div>
     </div>
-    <div class="url-box">
-      <div class="url-l">
-        <div class="url-lbl">📹 Zoom URL</div>
-        <div class="url-val" id="rUrl">—</div>
+    <!-- 1件の場合 -->
+    <div id="singleResult">
+      <div class="res-grid" style="grid-template-columns:1fr;">
+        <div class="res-item"><div class="res-lbl">🕐 日時</div><div class="res-val" id="rDT">—</div></div>
       </div>
-      <button class="copy-btn" onclick="copyUrl()">コピー</button>
+      <div class="url-box">
+        <div class="url-l">
+          <div class="url-lbl">📹 Zoom URL</div>
+          <div class="url-val" id="rUrl">—</div>
+        </div>
+        <button class="copy-btn" onclick="copyUrl()">コピー</button>
+      </div>
+      <div class="act-row">
+        <a class="act-btn gcal" id="rGcal" href="#" target="_blank">📅 カレンダーを開く</a>
+        <a class="act-btn zoom" id="rZoom" href="#" target="_blank">📹 Zoomを開く</a>
+      </div>
     </div>
-    <div class="act-row">
-      <a class="act-btn gcal" id="rGcal" href="#" target="_blank">📅 カレンダーを開く</a>
-      <a class="act-btn zoom" id="rZoom" href="#" target="_blank">📹 Zoomを開く</a>
+    <!-- 複数の場合 -->
+    <div id="multiResults" style="display:none;"></div>
+    <div class="act-row" style="display:none;">
       <button class="btn-ghost" style="margin-left:auto;" onclick="newMeeting()">＋ 新しい会議</button>
     </div>
   </div>
@@ -325,8 +394,12 @@ document.getElementById('fDate').value = tom.toISOString().split('T')[0];
 document.getElementById('fStart').value = '10:00';
 document.getElementById('fEnd').value = '11:00';
 document.getElementById('fAtt').addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();addChip();} });
+document.getElementById('fRecur').addEventListener('change', function() {
+  document.getElementById('recurOptions').style.display = this.value !== 'none' ? 'block' : 'none';
+});
 handleCallback();
 restoreSession();
+addSlot(); // Add default first slot
 
 // ── RENDER ACCOUNTS ──
 function renderAccounts() {
@@ -404,11 +477,14 @@ function applyLogin(id, token) {
   document.getElementById('loginBtn').style.display = 'none';
 
   // Enable form
-  ['fTitle','fDate','fStart','fEnd','fDesc','fAtt'].forEach(id => {
+  ['fTitle','fDesc','fAtt','fRecur','fRecurEnd'].forEach(id => {
     document.getElementById(id).disabled = false;
   });
   document.getElementById('btnAddAtt').disabled = false;
   document.getElementById('btnSubmit').disabled = false;
+  document.getElementById('btnAddSlot').disabled = false;
+  // Enable existing slot inputs
+  document.querySelectorAll('.slot-input').forEach(el => el.disabled = false);
 
   // Status pill
   const pill = document.getElementById('statusPill');
@@ -430,6 +506,63 @@ function renderChips() {
   ).join('');
 }
 
+// ── SLOTS ──
+let slotId = 0;
+const slots = [];
+
+function addSlot() {
+  const id = ++slotId;
+  const isFirst = slots.length === 0;
+  const tom = new Date(); tom.setDate(tom.getDate()+1);
+  const defaultDate = tom.toISOString().split('T')[0];
+  const isLoggedIn = !!S.token;
+
+  slots.push(id);
+
+  const div = document.createElement('div');
+  div.className = 'slot-item';
+  div.id = 'slot-' + id;
+  div.innerHTML = `
+    <div class="slot-num">日程 ${slots.length}</div>
+    <div class="f">
+      <label>日付</label>
+      <input type="date" class="slot-input" id="slot-date-${id}" value="${defaultDate}" ${isLoggedIn ? '' : 'disabled'} />
+    </div>
+    <div class="f">
+      <label>開始時間</label>
+      <input type="time" class="slot-input" id="slot-start-${id}" value="10:00" ${isLoggedIn ? '' : 'disabled'} />
+    </div>
+    <div class="f">
+      <label>終了時間</label>
+      <input type="time" class="slot-input" id="slot-end-${id}" value="11:00" ${isLoggedIn ? '' : 'disabled'} />
+    </div>
+    ${slots.length > 1 ? `<button class="slot-del" onclick="removeSlot(${id})">×</button>` : '<div></div>'}
+  `;
+  document.getElementById('slotList').appendChild(div);
+  renumberSlots();
+}
+
+function removeSlot(id) {
+  const idx = slots.indexOf(id);
+  if (idx > -1) slots.splice(idx, 1);
+  document.getElementById('slot-' + id).remove();
+  renumberSlots();
+}
+
+function renumberSlots() {
+  slots.forEach((id, i) => {
+    const numEl = document.querySelector(`#slot-${id} .slot-num`);
+    if (numEl) numEl.textContent = `日程 ${i + 1}`;
+    // Show/hide delete button
+    const delBtn = document.querySelector(`#slot-${id} .slot-del`);
+    if (i === 0 && slots.length === 1) {
+      if (delBtn) delBtn.style.display = 'none';
+    } else {
+      if (delBtn) delBtn.style.display = 'flex';
+    }
+  });
+}
+
 // ── SUBMIT ──
 async function doSubmit() {
   const title = document.getElementById('fTitle').value.trim();
@@ -438,7 +571,16 @@ async function doSubmit() {
   const end   = document.getElementById('fEnd').value;
   const desc  = document.getElementById('fDesc').value.trim();
 
-  if (!title || !date || !start || !end) { alert('タイトル、日付、時間は必須です。'); return; }
+  if (!title) { alert('タイトルは必須です。'); return; }
+  if (slots.length === 0) { alert('日程を1つ以上追加してください。'); return; }
+
+  // Validate all slots
+  for (const sid of slots) {
+    const d = document.getElementById('slot-date-'+sid)?.value;
+    const s = document.getElementById('slot-start-'+sid)?.value;
+    const e = document.getElementById('slot-end-'+sid)?.value;
+    if (!d || !s || !e) { alert('すべての日程に日付と時間を入力してください。'); return; }
+  }
 
   const acc = ACCOUNTS.find(a => a.id === S.selectedId);
   const btn = document.getElementById('btnSubmit');
@@ -448,54 +590,73 @@ async function doSubmit() {
   const pc = document.getElementById('progCard'); pc.classList.add('show');
   const pf = document.getElementById('progFill');
   const pl = document.getElementById('progLbl');
-  setStep(1,'active'); pf.style.width='10%'; pl.textContent='準備中...';
+  setStep(1,'active'); pf.style.width='5%'; pl.textContent='準備中...';
   await sleep(400);
 
-  const startISO = `${date}T${start}:00+09:00`;
-  const endISO   = `${date}T${end}:00+09:00`;
-  let zoomUrl = null;
+  const recur = document.getElementById('fRecur').value;
+  const recurEnd = document.getElementById('fRecurEnd').value;
+  const results = [];
 
-  pl.textContent = '📹 Zoom URLを生成中...';
-  pf.style.width = '35%';
+  for (let i = 0; i < slots.length; i++) {
+    const sid = slots[i];
+    const date  = document.getElementById('slot-date-'+sid).value;
+    const start = document.getElementById('slot-start-'+sid).value;
+    const end   = document.getElementById('slot-end-'+sid).value;
+    const startISO = `${date}T${start}:00+09:00`;
+    const endISO   = `${date}T${end}:00+09:00`;
+    const progress = Math.round(((i + 0.3) / slots.length) * 80) + 5;
 
-  // STEP 1: Zoom API で直接ミーティング作成
-  try {
-    zoomUrl = await createZoomMeeting(acc.zoom, title, startISO, end, date);
-  } catch(e) {
-    console.warn('Zoom API error:', e);
+    pl.textContent = `📹 日程${i+1}/${slots.length} Zoom生成中...`;
+    pf.style.width = progress + '%';
+    setStep(1, i === slots.length-1 ? 'done' : 'active');
+
+    let zoomUrl = null;
+    try {
+      zoomUrl = await createZoomMeeting(acc.zoom, title, startISO, end, date);
+    } catch(e) { console.warn('Zoom error:', e); }
+
+    if (!zoomUrl) {
+      const id = Math.floor(Math.random()*9e9)+1e9;
+      zoomUrl = `https://zoom.us/j/${id}?pwd=${Math.random().toString(36).slice(2,10)}`;
+    }
+
+    setStep(2,'active');
+    pl.textContent = `📅 日程${i+1}/${slots.length} カレンダー登録中...`;
+    pf.style.width = Math.round(((i + 0.7) / slots.length) * 80) + 5 + '%';
+
+    const fullDesc = `📹 Zoom URL: ${zoomUrl}${desc ? '
+
+'+desc : ''}`;
+    let gcalLink = null;
+    try {
+      const eventBody = {
+        summary: title,
+        description: fullDesc,
+        start: { dateTime: startISO, timeZone: 'Asia/Tokyo' },
+        end:   { dateTime: endISO,   timeZone: 'Asia/Tokyo' },
+        attendees: S.attendees.map(e => ({ email: e }))
+      };
+      if (recur !== 'none' && recurEnd) {
+        const untilDate = recurEnd.replace(/-/g,'') + 'T000000Z';
+        const ruleMap = { daily:'RRULE:FREQ=DAILY', weekly:'RRULE:FREQ=WEEKLY', biweekly:'RRULE:FREQ=WEEKLY;INTERVAL=2', monthly:'RRULE:FREQ=MONTHLY' };
+        eventBody.recurrence = [`${ruleMap[recur]};UNTIL=${untilDate}`];
+      }
+      const ev = await apiPost(acc.email, eventBody, false);
+      gcalLink = ev.htmlLink;
+    } catch(e) {
+      console.warn('Calendar error:', e);
+      gcalLink = buildGcalUrl(title, date, start, end, fullDesc);
+    }
+
+    results.push({ date, start, end, zoomUrl, gcalLink });
+    await sleep(200);
   }
 
-  if (!zoomUrl) {
-    await sleep(400);
-    const id = Math.floor(Math.random()*9e9)+1e9;
-    zoomUrl = `https://zoom.us/j/${id}?pwd=${Math.random().toString(36).slice(2,10)}`;
-  }
-
-  // STEP 2: Google Calendar にイベント作成（Zoom URLを説明に挿入）
-  const fullDesc = `📹 Zoom URL: ${zoomUrl}${desc ? '\n\n'+desc : ''}`;
-  try {
-    const ev = await apiPost(acc.email, {
-      summary: title,
-      description: fullDesc,
-      start: { dateTime: startISO, timeZone: 'Asia/Tokyo' },
-      end:   { dateTime: endISO,   timeZone: 'Asia/Tokyo' },
-      attendees: S.attendees.map(e => ({ email: e }))
-    }, false);
-    S.result.gcalLink = ev.htmlLink;
-  } catch(e) {
-    console.warn('Calendar API error:', e);
-    S.result.gcalLink = buildGcalUrl(title, date, start, end, fullDesc);
-  }
-
-  setStep(1,'done'); setStep(2,'active');
-  pf.style.width='70%'; pl.textContent='📅 カレンダーに登録中...';
-  await sleep(500);
-
-  setStep(2,'done'); setStep(3,'done');
+  setStep(1,'done'); setStep(2,'done'); setStep(3,'done');
   pf.style.width='100%'; pl.textContent='✅ 完了！';
   await sleep(400);
 
-  S.result = { ...S.result, title, dateTime: fmtDT(date,start,end), zoomUrl };
+  S.result = { title, results };
   showResult();
 
   btn.disabled = false;
@@ -576,10 +737,41 @@ function fmtDT(date,start,end) {
 }
 function showResult() {
   document.getElementById('rTitle').textContent = S.result.title;
-  document.getElementById('rDT').textContent    = S.result.dateTime;
-  document.getElementById('rUrl').textContent   = S.result.zoomUrl || '（生成失敗）';
-  if (S.result.zoomUrl) document.getElementById('rZoom').href = S.result.zoomUrl;
-  if (S.result.gcalLink) document.getElementById('rGcal').href = S.result.gcalLink;
+  const r = S.result.results;
+
+  // Single slot: show simple view
+  if (r.length === 1) {
+    document.getElementById('rDT').textContent = fmtDT(r[0].date, r[0].start, r[0].end);
+    document.getElementById('rUrl').textContent = r[0].zoomUrl || '（生成失敗）';
+    if (r[0].zoomUrl) document.getElementById('rZoom').href = r[0].zoomUrl;
+    if (r[0].gcalLink) document.getElementById('rGcal').href = r[0].gcalLink;
+    document.getElementById('multiResults').style.display = 'none';
+    document.getElementById('singleResult').style.display = 'block';
+  } else {
+    // Multiple slots
+    document.getElementById('singleResult').style.display = 'none';
+    document.getElementById('multiResults').style.display = 'block';
+    document.getElementById('multiResults').innerHTML = r.map((item, i) => `
+      <div class="res-item" style="margin-bottom:8px; padding:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <div style="font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent2);">日程 ${i+1}</div>
+          <div style="font-size:0.78rem; color:var(--text2);">${fmtDT(item.date, item.start, item.end)}</div>
+        </div>
+        <div class="url-box" style="margin-bottom:6px;">
+          <div class="url-l">
+            <div class="url-lbl">📹 Zoom URL</div>
+            <div class="url-val">${item.zoomUrl || '（生成失敗）'}</div>
+          </div>
+          <button class="copy-btn" onclick="navigator.clipboard?.writeText('${item.zoomUrl}').then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='コピー',1500)})">コピー</button>
+        </div>
+        <div class="act-row">
+          ${item.gcalLink ? `<a class="act-btn gcal" href="${item.gcalLink}" target="_blank">📅 カレンダー</a>` : ''}
+          ${item.zoomUrl ? `<a class="act-btn zoom" href="${item.zoomUrl}" target="_blank">📹 Zoom</a>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
   document.getElementById('resultCard').classList.add('show');
   document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -591,6 +783,13 @@ function copyUrl() {
 }
 function resetForm() {
   ['fTitle','fDesc','fAtt'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fRecur').value = 'none';
+  document.getElementById('recurOptions').style.display = 'none';
+  // Reset slots
+  slots.length = 0;
+  slotId = 0;
+  document.getElementById('slotList').innerHTML = '';
+  addSlot(); // add default first slot
   S.attendees=[]; renderChips();
 }
 function newMeeting() {
