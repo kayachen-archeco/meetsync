@@ -144,6 +144,21 @@ textarea { resize: vertical; min-height: 68px; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 @keyframes pop { from{opacity:0;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
 
+/* Frequent members */
+.freq-members { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; min-height: 10px; }
+.freq-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px 4px 10px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 20px; font-size: 0.75rem; font-weight: 500;
+  color: var(--text2); cursor: pointer; transition: all 0.15s;
+}
+.freq-chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.08); }
+.freq-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.12); }
+.freq-chip-del { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 0.8rem; padding: 0; margin-left: 2px; transition: color 0.15s; }
+.freq-chip-del:hover { color: var(--red); }
+.freq-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+
 @media(max-width:580px){
   header{padding:0 16px;} main{padding:28px 14px 80px;}
   .r3{grid-template-columns:1fr 1fr;} .r2{grid-template-columns:1fr;}
@@ -223,6 +238,12 @@ textarea { resize: vertical; min-height: 68px; }
 
   <!-- ③ 参加者 -->
   <div class="sec-label">③ 参加者を追加</div>
+  <!-- よく使うメンバー -->
+  <div id="freqWrap" style="display:none; margin-bottom:10px;">
+    <div class="freq-label">よく使うメンバー</div>
+    <div class="freq-members" id="freqList"></div>
+  </div>
+
   <div class="chips" id="chipList"></div>
   <div class="add-row">
     <input type="email" id="fAtt" placeholder="メールアドレスを入力して追加" disabled />
@@ -468,6 +489,63 @@ function updateSlotNumbers() {
 }
 
 // ══════════════════════════════════════
+// FREQUENT MEMBERS
+// ══════════════════════════════════════
+const DEFAULT_MEMBERS = [
+  { email: 'masashi.tsuzaki.archeco.01@gmail.com', name: 'まさしさん' },
+  { email: 'isao.yoshida.archeco.01@gmail.com',   name: 'いさおさん' },
+  { email: 'kaya.chen.archeco.01@gmail.com',       name: 'かや' },
+  { email: 'ressie.wong.archeco.01@gmail.com',     name: 'レッシー' }
+];
+
+// 初回はデフォルトメンバーをセット
+const savedFreq = localStorage.getItem('meetsync_freq');
+let freqMembers = savedFreq ? JSON.parse(savedFreq) : [...DEFAULT_MEMBERS];
+if (!savedFreq) localStorage.setItem('meetsync_freq', JSON.stringify(freqMembers));
+
+// DOMが準備できてから実行
+window.addEventListener('DOMContentLoaded', function() {
+  renderFreqMembers();
+});
+
+function renderFreqMembers() {
+  if (freqMembers.length === 0) {
+    document.getElementById('freqWrap').style.display = 'none';
+    return;
+  }
+  document.getElementById('freqWrap').style.display = 'block';
+  document.getElementById('freqList').innerHTML = freqMembers.map(m => `
+    <div class="freq-chip ${S.attendees.includes(m.email) ? 'active' : ''}" onclick="toggleFreqMember('${m.email}')">
+      <span>${m.name || m.email.split('@')[0]}</span>
+    </div>
+  `).join('');
+}
+
+function toggleFreqMember(email) {
+  if (S.attendees.includes(email)) {
+    S.attendees = S.attendees.filter(e => e !== email);
+  } else {
+    S.attendees.push(email);
+  }
+  renderChips();
+  renderFreqMembers();
+}
+
+function saveFreqMember(email) {
+  if (!freqMembers.find(m => m.email === email)) {
+    freqMembers.push({ email, name: email.split('@')[0] });
+    localStorage.setItem('meetsync_freq', JSON.stringify(freqMembers));
+    renderFreqMembers();
+  }
+}
+
+function deleteFreqMember(email) {
+  freqMembers = freqMembers.filter(m => m.email !== email);
+  localStorage.setItem('meetsync_freq', JSON.stringify(freqMembers));
+  renderFreqMembers();
+}
+
+// ══════════════════════════════════════
 // ATTENDEES
 // ══════════════════════════════════════
 function addChip() {
@@ -475,13 +553,16 @@ function addChip() {
   const val = inp.value.trim();
   if (!val || !val.includes('@') || S.attendees.includes(val)) { inp.value = ''; return; }
   S.attendees.push(val);
+  saveFreqMember(val); // よく使うメンバーに自動保存
   renderChips();
+  renderFreqMembers();
   inp.value = '';
 }
 
 function removeChip(email) {
   S.attendees = S.attendees.filter(e => e !== email);
   renderChips();
+  renderFreqMembers();
 }
 
 function renderChips() {
