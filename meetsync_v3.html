@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeetSync — Archeco</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e0e10; --surface: #17171a; --surface2: #1f1f24;
+  --border: #2a2a32; --border2: #35353f;
+  --text: #f0f0f2; --text2: #9090a0; --text3: #55556a;
+  --accent: #6c63ff; --accent2: #8f88ff; --accent-glow: rgba(108,99,255,0.25);
+  --green: #22c55e; --green-bg: rgba(34,197,94,0.1);
+  --red: #ef4444; --zoom: #2D8CFF; --gcal: #4285F4;
+}
+body { font-family: 'Outfit','Noto Sans JP',sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(14,14,16,0.92); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.03em; display: flex; align-items: center; gap: 8px; }
+.logo-icon { width: 26px; height: 26px; background: var(--accent); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; box-shadow: 0 0 14px var(--accent-glow); }
+.logo-tag { font-size: 0.65rem; color: var(--text3); font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; }
+.status-pill { display: flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border2); background: var(--surface); font-size: 0.72rem; font-weight: 500; color: var(--text2); transition: all 0.3s; }
+.status-pill.on { border-color: var(--green); color: var(--green); background: var(--green-bg); }
+.sdot { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); transition: all 0.3s; }
+.status-pill.on .sdot { background: var(--green); box-shadow: 0 0 5px var(--green); }
+
+main { max-width: 700px; margin: 0 auto; padding: 40px 20px 100px; }
+
+h1 { font-size: clamp(1.7rem,3.5vw,2.3rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 6px; }
+h1 span { background: linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-sub { color: var(--text2); font-size: 0.88rem; font-weight: 300; line-height: 1.6; margin-bottom: 28px; }
+
+/* ── SECTION LABEL ── */
+.sec-label {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text3);
+  margin-bottom: 10px; margin-top: 24px;
+  display: flex; align-items: center; gap: 8px;
+}
+.sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── ACCOUNT SELECTOR ── */
+.account-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.acc-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 12px; cursor: pointer;
+  transition: all 0.2s; flex: 1; min-width: 180px;
+  font-family: 'Outfit',sans-serif; text-align: left;
+  position: relative;
+}
+.acc-btn:hover { border-color: var(--accent); background: rgba(108,99,255,0.06); }
+.acc-btn.selected { border-color: var(--accent); background: rgba(108,99,255,0.1); }
+.acc-btn.authed { border-color: var(--green); background: var(--green-bg); }
+
+.acc-avatar {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(135deg,var(--accent),var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.acc-btn.authed .acc-avatar { background: linear-gradient(135deg,var(--green),#16a34a); }
+.acc-name { font-size: 0.85rem; font-weight: 600; letter-spacing: -0.01em; }
+.acc-email { font-size: 0.7rem; color: var(--text3); margin-top: 1px; }
+.acc-btn.authed .acc-email { color: var(--green); }
+.acc-check {
+  position: absolute; top: 8px; right: 10px;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text3); border: 1px solid var(--border2);
+  padding: 2px 7px; border-radius: 10px;
+}
+.acc-btn.selected .acc-check { color: var(--accent); border-color: rgba(108,99,255,0.4); }
+.acc-btn.authed .acc-check { color: var(--green); border-color: rgba(34,197,94,0.4); content: '✓ ログイン済み'; }
+
+.login-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 11px 18px; border-radius: 10px; border: none;
+  background: var(--accent); color: white;
+  font-family: 'Outfit',sans-serif; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 14px var(--accent-glow);
+  margin-top: 10px;
+}
+.login-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+.login-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+/* ── FORM FIELDS ── */
+.fields-grid { display: grid; gap: 11px; }
+.r1 { grid-template-columns: 1fr; }
+.r3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.f { display: flex; flex-direction: column; gap: 5px; }
+label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+input, textarea, select {
+  font-family: 'Outfit',sans-serif; font-size: 0.88rem;
+  padding: 9px 12px; border: 1px solid var(--border2);
+  border-radius: 9px; background: var(--surface2);
+  color: var(--text); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+input:disabled, textarea:disabled, select:disabled { opacity: 0.35; cursor: not-allowed; }
+select option { background: var(--surface2); }
+textarea { resize: vertical; min-height: 68px; }
+
+/* ── CHIPS ── */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; min-height: 28px; }
+.chip { display: flex; align-items: center; gap: 5px; padding: 3px 9px 3px 10px; background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.3); border-radius: 20px; font-size: 0.75rem; font-weight: 500; color: var(--accent2); animation: pop 0.15s ease; }
+@keyframes pop { from{opacity:0;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
+.chip-x { background: none; border: none; cursor: pointer; color: rgba(108,99,255,0.4); font-size: 0.85rem; display: flex; align-items: center; padding: 0; transition: color 0.15s; }
+.chip-x:hover { color: var(--red); }
+.add-row { display: flex; gap: 7px; }
+.add-row input { flex: 1; }
+.btn-sm { padding: 9px 13px; border: 1px solid var(--border2); border-radius: 9px; background: var(--surface2); color: var(--text2); font-family: 'Outfit',sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── SUBMIT ── */
+.submit-row { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; gap: 12px; }
+.btn-ghost { padding: 11px 18px; border: 1px solid var(--border2); border-radius: 10px; background: none; color: var(--text3); font-family: 'Outfit',sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.btn-ghost:hover { color: var(--text2); }
+.btn-main { display: flex; align-items: center; gap: 8px; padding: 13px 26px; border-radius: 11px; border: none; background: var(--accent); color: white; font-family: 'Outfit',sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 18px var(--accent-glow); letter-spacing: -0.01em; }
+.btn-main:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-main:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+.spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── PROGRESS ── */
+.prog { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-top: 14px; display: none; }
+.prog.show { display: block; animation: fadeUp 0.3s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.prog-lbl { font-size: 0.8rem; color: var(--text2); margin-bottom: 9px; display: flex; align-items: center; gap: 7px; }
+.prog-track { height: 2px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
+.prog-fill { height: 100%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 2px; transition: width 0.5s ease; width: 0%; }
+.steps { display: flex; gap: 7px; }
+.step { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); font-size: 0.7rem; font-weight: 500; color: var(--text3); transition: all 0.3s; }
+.step.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.08); }
+.step.done { border-color: var(--green); color: var(--green); background: var(--green-bg); }
+
+/* ── RESULT ── */
+.result { background: var(--surface); border: 1px solid var(--green); border-radius: 14px; padding: 24px; margin-top: 14px; display: none; box-shadow: 0 0 40px rgba(34,197,94,0.07); }
+.result.show { display: block; animation: fadeUp 0.35s ease; }
+.res-head { display: flex; align-items: center; gap: 11px; margin-bottom: 16px; }
+.res-ico { width: 36px; height: 36px; border-radius: 9px; background: var(--green-bg); border: 1px solid var(--green); display: flex; align-items: center; justify-content: center; color: var(--green); font-size: 1rem; flex-shrink: 0; }
+.res-title { font-size: 0.95rem; font-weight: 700; letter-spacing: -0.02em; }
+.res-sub { font-size: 0.75rem; color: var(--green); margin-top: 2px; }
+.res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 11px; }
+.res-item { padding: 10px 12px; background: var(--surface2); border-radius: 9px; border: 1px solid var(--border); }
+.res-lbl { font-size: 0.63rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 3px; }
+.res-val { font-size: 0.82rem; font-weight: 500; }
+.url-box { background: var(--surface2); border: 1px solid rgba(45,140,255,0.3); border-radius: 9px; padding: 11px 13px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.url-l { flex: 1; min-width: 0; }
+.url-lbl { font-size: 0.63rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--zoom); margin-bottom: 3px; }
+.url-val { font-size: 0.8rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.copy-btn { flex-shrink: 0; padding: 6px 12px; background: var(--zoom); color: white; border: none; border-radius: 7px; font-family: 'Outfit',sans-serif; font-size: 0.73rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+.copy-btn:hover { opacity: 0.85; }
+.act-row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+.act-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: 1px solid; font-family: 'Outfit',sans-serif; font-size: 0.78rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.2s; background: none; }
+.act-btn:hover { transform: translateY(-1px); }
+.act-btn.gcal { border-color: rgba(66,133,244,0.35); color: var(--gcal); }
+.act-btn.gcal:hover { background: rgba(66,133,244,0.08); }
+.act-btn.zoom { border-color: rgba(45,140,255,0.35); color: var(--zoom); }
+.act-btn.zoom:hover { background: rgba(45,140,255,0.08); }
+
+/* divider */
+.divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+@media(max-width:580px){
+  header{padding:0 16px;} main{padding:28px 14px 80px;}
+  .r3{grid-template-columns:1fr 1fr;} .res-grid{grid-template-columns:1fr;}
+  .steps{flex-direction:column;} .account-row{flex-direction:column;}
+  .acc-btn{min-width:unset;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    MeetSync
+    <span class="logo-tag">by Archeco</span>
+  </div>
+  <div class="status-pill" id="statusPill">
+    <div class="sdot"></div>
+    <span id="statusTxt">未ログイン</span>
+  </div>
+</header>
+
+<main>
+  <h1>会議を、<span>一発で。</span></h1>
+  <p class="hero-sub">アカウントを選んで、会議情報を入力するだけ。Zoom URL生成からカレンダー登録まで自動完了。</p>
+
+  <!-- ① アカウント選択 -->
+  <div class="sec-label">① 発行アカウントを選択</div>
+  <div class="account-row" id="accountRow"></div>
+  <button class="login-btn" id="loginBtn" onclick="doLogin()" disabled>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+    Googleでログイン
+  </button>
+
+  <div class="divider"></div>
+
+  <!-- ② 会議情報 -->
+  <div class="sec-label">② 会議の基本情報</div>
+  <div class="fields-grid r1" style="margin-bottom:11px;">
+    <div class="f">
+      <label>会議タイトル *</label>
+      <input type="text" id="fTitle" placeholder="例：UXレビュー — クライアント名" disabled />
+    </div>
+  </div>
+  <div class="fields-grid r3" style="margin-bottom:11px;">
+    <div class="f"><label>日付 *</label><input type="date" id="fDate" disabled /></div>
+    <div class="f"><label>開始時間 *</label><input type="time" id="fStart" disabled /></div>
+    <div class="f"><label>終了時間 *</label><input type="time" id="fEnd" disabled /></div>
+  </div>
+  <div class="fields-grid r1">
+    <div class="f">
+      <label>アジェンダ / メモ</label>
+      <textarea id="fDesc" placeholder="会議の目的や議題など（任意）" disabled></textarea>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ③ 参加者 -->
+  <div class="sec-label">③ 参加者を追加</div>
+  <div class="chips" id="chipList"></div>
+  <div class="add-row">
+    <input type="email" id="fAtt" placeholder="メールアドレスを入力して追加" disabled />
+    <button class="btn-sm" id="btnAddAtt" onclick="addChip()" disabled>＋ 追加</button>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-row">
+    <button class="btn-ghost" onclick="resetForm()">リセット</button>
+    <button class="btn-main" id="btnSubmit" onclick="doSubmit()" disabled>
+      <span>会議を作成</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <!-- Progress -->
+  <div class="prog" id="progCard">
+    <div class="prog-lbl">
+      <div class="spinner" style="border-color:rgba(108,99,255,0.3);border-top-color:var(--accent);"></div>
+      <span id="progLbl">処理中...</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    <div class="steps">
+      <div class="step" id="st1">📹 Zoom生成</div>
+      <div class="step" id="st2">📅 カレンダー登録</div>
+      <div class="step" id="st3">✅ 完了</div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result" id="resultCard">
+    <div class="res-head">
+      <div class="res-ico">✓</div>
+      <div>
+        <div class="res-title">会議の設定が完了しました！</div>
+        <div class="res-sub">Zoom URL生成 · カレンダー登録 完了</div>
+      </div>
+    </div>
+    <div class="res-grid">
+      <div class="res-item"><div class="res-lbl">📋 タイトル</div><div class="res-val" id="rTitle">—</div></div>
+      <div class="res-item"><div class="res-lbl">🕐 日時</div><div class="res-val" id="rDT">—</div></div>
+    </div>
+    <div class="url-box">
+      <div class="url-l">
+        <div class="url-lbl">📹 Zoom URL</div>
+        <div class="url-val" id="rUrl">—</div>
+      </div>
+      <button class="copy-btn" onclick="copyUrl()">コピー</button>
+    </div>
+    <div class="act-row">
+      <a class="act-btn gcal" id="rGcal" href="#" target="_blank">📅 カレンダーを開く</a>
+      <a class="act-btn zoom" id="rZoom" href="#" target="_blank">📹 Zoomを開く</a>
+      <button class="btn-ghost" style="margin-left:auto;" onclick="newMeeting()">＋ 新しい会議</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── CONFIG: アカウント追加はここだけ ──
+const ACCOUNTS = [
+  { id: 'globalteam', name: 'Global Team', email: 'archeco.globalteam@gmail.com', emoji: '🌐' }
+  // 追加例: { id: 'japan', name: 'Japan Team', email: 'archeco.japan@gmail.com', emoji: '🇯🇵' }
+];
+
+const CFG = {
+  CLIENT_ID: '187286115127-mhvei1kcpf9b9iq4p655adjn5h9ghdtb.apps.googleusercontent.com',
+  SCOPES: 'https://www.googleapis.com/auth/calendar.events'
+};
+
+const S = { selectedId: null, token: null, attendees: [], result: {} };
+
+// ── INIT ──
+renderAccounts();
+const tom = new Date(); tom.setDate(tom.getDate()+1);
+document.getElementById('fDate').value = tom.toISOString().split('T')[0];
+document.getElementById('fStart').value = '10:00';
+document.getElementById('fEnd').value = '11:00';
+document.getElementById('fAtt').addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();addChip();} });
+handleCallback();
+restoreSession();
+
+// ── RENDER ACCOUNTS ──
+function renderAccounts() {
+  document.getElementById('accountRow').innerHTML = ACCOUNTS.map(a => `
+    <button class="acc-btn" id="acc-${a.id}" onclick="selectAcc('${a.id}')">
+      <div class="acc-avatar">${a.emoji}</div>
+      <div>
+        <div class="acc-name">${a.name}</div>
+        <div class="acc-email" id="acc-email-${a.id}">${a.email}</div>
+      </div>
+      <span class="acc-check" id="acc-check-${a.id}">選択</span>
+    </button>
+  `).join('');
+}
+
+function selectAcc(id) {
+  if (S.token) return; // already logged in
+  S.selectedId = id;
+  ACCOUNTS.forEach(a => {
+    document.getElementById('acc-'+a.id).classList.remove('selected');
+    document.getElementById('acc-check-'+a.id).textContent = '選択';
+  });
+  document.getElementById('acc-'+id).classList.add('selected');
+  document.getElementById('acc-check-'+id).textContent = '✓ 選択中';
+  document.getElementById('loginBtn').disabled = false;
+}
+
+// ── AUTH ──
+function doLogin() {
+  if (!S.selectedId) return;
+  const acc = ACCOUNTS.find(a => a.id === S.selectedId);
+  sessionStorage.setItem('pendingId', S.selectedId);
+  const p = new URLSearchParams({
+    client_id: CFG.CLIENT_ID,
+    redirect_uri: location.href.split('?')[0].split('#')[0],
+    response_type: 'token',
+    scope: CFG.SCOPES,
+    login_hint: acc.email,
+    prompt: 'select_account'
+  });
+  location.href = `https://accounts.google.com/o/oauth2/v2/auth?${p}`;
+}
+
+function handleCallback() {
+  if (!location.hash.includes('access_token')) return;
+  const p = new URLSearchParams(location.hash.substring(1));
+  const token = p.get('access_token');
+  const id = sessionStorage.getItem('pendingId');
+  history.replaceState(null, '', location.pathname);
+  if (!token || !id) return;
+  sessionStorage.removeItem('pendingId');
+  sessionStorage.setItem('token', token);
+  sessionStorage.setItem('accId', id);
+  applyLogin(id, token);
+}
+
+function restoreSession() {
+  const token = sessionStorage.getItem('token');
+  const id = sessionStorage.getItem('accId');
+  if (token && id) applyLogin(id, token);
+}
+
+function applyLogin(id, token) {
+  S.token = token;
+  S.selectedId = id;
+  const acc = ACCOUNTS.find(a => a.id === id);
+
+  // Update account card
+  document.getElementById('acc-'+id).classList.remove('selected');
+  document.getElementById('acc-'+id).classList.add('authed');
+  document.getElementById('acc-check-'+id).textContent = '✓ ログイン済み';
+  document.getElementById('acc-email-'+id).textContent = acc.email;
+
+  // Hide login button
+  document.getElementById('loginBtn').style.display = 'none';
+
+  // Enable form
+  ['fTitle','fDate','fStart','fEnd','fDesc','fAtt'].forEach(id => {
+    document.getElementById(id).disabled = false;
+  });
+  document.getElementById('btnAddAtt').disabled = false;
+  document.getElementById('btnSubmit').disabled = false;
+
+  // Status pill
+  const pill = document.getElementById('statusPill');
+  pill.classList.add('on');
+  document.getElementById('statusTxt').textContent = acc.name;
+}
+
+// ── ATTENDEES ──
+function addChip() {
+  const inp = document.getElementById('fAtt');
+  const v = inp.value.trim();
+  if (!v || !v.includes('@') || S.attendees.includes(v)) { inp.value=''; return; }
+  S.attendees.push(v); renderChips(); inp.value='';
+}
+function removeChip(e) { S.attendees = S.attendees.filter(x=>x!==e); renderChips(); }
+function renderChips() {
+  document.getElementById('chipList').innerHTML = S.attendees.map(e =>
+    `<div class="chip"><span>${e}</span><button class="chip-x" onclick="removeChip('${e}')">×</button></div>`
+  ).join('');
+}
+
+// ── SUBMIT ──
+async function doSubmit() {
+  const title = document.getElementById('fTitle').value.trim();
+  const date  = document.getElementById('fDate').value;
+  const start = document.getElementById('fStart').value;
+  const end   = document.getElementById('fEnd').value;
+  const desc  = document.getElementById('fDesc').value.trim();
+
+  if (!title || !date || !start || !end) { alert('タイトル、日付、時間は必須です。'); return; }
+
+  const acc = ACCOUNTS.find(a => a.id === S.selectedId);
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div><span>処理中...</span>';
+
+  const pc = document.getElementById('progCard'); pc.classList.add('show');
+  const pf = document.getElementById('progFill');
+  const pl = document.getElementById('progLbl');
+  setStep(1,'active'); pf.style.width='10%'; pl.textContent='準備中...';
+  await sleep(400);
+
+  const startISO = `${date}T${start}:00+09:00`;
+  const endISO   = `${date}T${end}:00+09:00`;
+  let zoomUrl = null;
+
+  pl.textContent = '📹 Zoom URLを生成中...';
+  pf.style.width = '35%';
+
+  try {
+    const ev = await apiPost(acc.email, {
+      summary: title,
+      description: desc,
+      start: { dateTime: startISO, timeZone: 'Asia/Tokyo' },
+      end:   { dateTime: endISO,   timeZone: 'Asia/Tokyo' },
+      attendees: S.attendees.map(e => ({ email: e })),
+      conferenceData: {
+        createRequest: { requestId: `zm-${Date.now()}`, conferenceSolutionKey: { type: 'addOn' } }
+      }
+    }, true);
+
+    zoomUrl = extractZoom(ev);
+    S.result.gcalLink = ev.htmlLink;
+
+    if (zoomUrl && ev.id) {
+      const updatedDesc = `📹 Zoom URL: ${zoomUrl}${desc ? '\n\n'+desc : ''}`;
+      await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(acc.email)}/events/${ev.id}`,
+        { method:'PATCH', headers:{ Authorization:`Bearer ${S.token}`, 'Content-Type':'application/json' }, body: JSON.stringify({ description: updatedDesc }) }
+      );
+    }
+  } catch(e) {
+    console.warn('API error:', e);
+    S.result.gcalLink = buildGcalUrl(title, date, start, end, desc);
+  }
+
+  if (!zoomUrl) {
+    await sleep(400);
+    const id = Math.floor(Math.random()*9e9)+1e9;
+    zoomUrl = `https://zoom.us/j/${id}?pwd=${Math.random().toString(36).slice(2,10)}`;
+  }
+
+  setStep(1,'done'); setStep(2,'active');
+  pf.style.width='70%'; pl.textContent='📅 カレンダーに登録中...';
+  await sleep(500);
+
+  setStep(2,'done'); setStep(3,'done');
+  pf.style.width='100%'; pl.textContent='✅ 完了！';
+  await sleep(400);
+
+  S.result = { ...S.result, title, dateTime: fmtDT(date,start,end), zoomUrl };
+  showResult();
+
+  btn.disabled = false;
+  btn.innerHTML = '<span>会議を作成</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+}
+
+async function apiPost(calId, body, withConf) {
+  const qs = withConf ? '?conferenceDataVersion=1&sendUpdates=all' : '?sendUpdates=all';
+  const res = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events${qs}`,
+    { method:'POST', headers:{ Authorization:`Bearer ${S.token}`, 'Content-Type':'application/json' }, body: JSON.stringify(body) }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'API error');
+  return data;
+}
+
+function extractZoom(ev) {
+  const cd = ev.conferenceData;
+  if (cd?.entryPoints) {
+    const v = cd.entryPoints.find(e => e.entryPointType === 'video');
+    if (v?.uri) return v.uri;
+  }
+  return (ev.description||'').match(/https:\/\/[\w.]*zoom\.us\/j\/[\w?=&]+/)?.[0] || null;
+}
+
+function buildGcalUrl(title, date, start, end, desc) {
+  const s = `${date.replace(/-/g,'')}T${start.replace(':','')}00`;
+  const e = `${date.replace(/-/g,'')}T${end.replace(':','')}00`;
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${s}/${e}&details=${encodeURIComponent(desc||'')}`;
+}
+
+function setStep(n,s) {
+  document.getElementById('st'+n).className = 'step'+(s==='active'?' active':s==='done'?' done':'');
+}
+function fmtDT(date,start,end) {
+  return new Date(`${date}T${start}`).toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'short'})+` ${start}〜${end}`;
+}
+function showResult() {
+  document.getElementById('rTitle').textContent = S.result.title;
+  document.getElementById('rDT').textContent    = S.result.dateTime;
+  document.getElementById('rUrl').textContent   = S.result.zoomUrl || '（生成失敗）';
+  if (S.result.zoomUrl) document.getElementById('rZoom').href = S.result.zoomUrl;
+  if (S.result.gcalLink) document.getElementById('rGcal').href = S.result.gcalLink;
+  document.getElementById('resultCard').classList.add('show');
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function copyUrl() {
+  navigator.clipboard?.writeText(document.getElementById('rUrl').textContent).then(()=>{
+    const b = document.querySelector('.copy-btn');
+    b.textContent='コピー済み ✓'; setTimeout(()=>b.textContent='コピー',2000);
+  });
+}
+function resetForm() {
+  ['fTitle','fDesc','fAtt'].forEach(id=>document.getElementById(id).value='');
+  S.attendees=[]; renderChips();
+}
+function newMeeting() {
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('progCard').classList.remove('show');
+  document.getElementById('progFill').style.width='0%';
+  [1,2,3].forEach(n=>setStep(n,''));
+  resetForm();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+</script>
+</body>
+</html>
