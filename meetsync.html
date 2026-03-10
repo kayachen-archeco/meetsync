@@ -520,8 +520,9 @@ async function createZoomMeeting(zoomCfg, title, startISO, end, date) {
   const [eh, em] = end.split(':').map(Number);
   const duration = (eh * 60 + em) - (sh * 60 + sm);
 
-  // Create meeting
-  const meetRes = await fetch('https://api.zoom.us/v2/users/me/meetings', {
+  // Create meeting on behalf of archeco.globalteam
+  const hostEmail = encodeURIComponent('archeco.globalteam@gmail.com');
+  const meetRes = await fetch(`https://api.zoom.us/v2/users/${hostEmail}/meetings`, {
     method: 'POST',
     headers: {
       'Authorization': 'Bearer ' + tokenData.access_token,
