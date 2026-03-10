@@ -13,10 +13,10 @@
   --text: #f0f0f2; --text2: #9090a0; --text3: #55556a;
   --accent: #6c63ff; --accent2: #8f88ff; --accent-glow: rgba(108,99,255,0.25);
   --green: #22c55e; --green-bg: rgba(34,197,94,0.1);
-  --red: #ef4444; --zoom: #2D8CFF; --gcal: #4285F4;
+  --red: #ef4444; --red-bg: rgba(239,68,68,0.1);
+  --zoom: #2D8CFF; --gcal: #4285F4;
 }
 body { font-family: 'Outfit','Noto Sans JP',sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
 header {
   position: sticky; top: 0; z-index: 100;
   background: rgba(14,14,16,0.92); backdrop-filter: blur(20px);
@@ -29,95 +29,60 @@ header {
 .logo-tag { font-size: 0.65rem; color: var(--text3); font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; }
 .status-pill { display: flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border2); background: var(--surface); font-size: 0.72rem; font-weight: 500; color: var(--text2); transition: all 0.3s; }
 .status-pill.on { border-color: var(--green); color: var(--green); background: var(--green-bg); }
-.sdot { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); transition: all 0.3s; }
+.sdot { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); }
 .status-pill.on .sdot { background: var(--green); box-shadow: 0 0 5px var(--green); }
-
 main { max-width: 700px; margin: 0 auto; padding: 40px 20px 100px; }
-
 h1 { font-size: clamp(1.7rem,3.5vw,2.3rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 6px; }
 h1 span { background: linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .hero-sub { color: var(--text2); font-size: 0.88rem; font-weight: 300; line-height: 1.6; margin-bottom: 28px; }
-
-/* ── SECTION LABEL ── */
-.sec-label {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--text3);
-  margin-bottom: 10px; margin-top: 24px;
-  display: flex; align-items: center; gap: 8px;
-}
+.sec-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; margin-top: 24px; display: flex; align-items: center; gap: 8px; }
 .sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
 
-/* ── ACCOUNT SELECTOR ── */
+/* Account */
 .account-row { display: flex; gap: 10px; flex-wrap: wrap; }
-
-.acc-btn {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px;
-  background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: 12px; cursor: pointer;
-  transition: all 0.2s; flex: 1; min-width: 180px;
-  font-family: 'Outfit',sans-serif; text-align: left;
-  position: relative;
-}
+.acc-btn { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.2s; flex: 1; min-width: 180px; font-family: 'Outfit',sans-serif; text-align: left; position: relative; }
 .acc-btn:hover { border-color: var(--accent); background: rgba(108,99,255,0.06); }
 .acc-btn.selected { border-color: var(--accent); background: rgba(108,99,255,0.1); }
-.acc-btn.authed { border-color: var(--green); background: var(--green-bg); }
-
-.acc-avatar {
-  width: 36px; height: 36px; border-radius: 9px;
-  background: linear-gradient(135deg,var(--accent),var(--accent2));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; flex-shrink: 0;
-}
+.acc-btn.authed { border-color: var(--green); background: var(--green-bg); cursor: default; }
+.acc-avatar { width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg,var(--accent),var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
 .acc-btn.authed .acc-avatar { background: linear-gradient(135deg,var(--green),#16a34a); }
-.acc-name { font-size: 0.85rem; font-weight: 600; letter-spacing: -0.01em; }
+.acc-name { font-size: 0.85rem; font-weight: 600; }
 .acc-email { font-size: 0.7rem; color: var(--text3); margin-top: 1px; }
 .acc-btn.authed .acc-email { color: var(--green); }
-.acc-check {
-  position: absolute; top: 8px; right: 10px;
-  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text3); border: 1px solid var(--border2);
-  padding: 2px 7px; border-radius: 10px;
-}
+.acc-check { position: absolute; top: 8px; right: 10px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text3); border: 1px solid var(--border2); padding: 2px 7px; border-radius: 10px; }
 .acc-btn.selected .acc-check { color: var(--accent); border-color: rgba(108,99,255,0.4); }
-.acc-btn.authed .acc-check { color: var(--green); border-color: rgba(34,197,94,0.4); content: '✓ ログイン済み'; }
-
-.login-btn {
-  display: flex; align-items: center; gap: 7px;
-  padding: 11px 18px; border-radius: 10px; border: none;
-  background: var(--accent); color: white;
-  font-family: 'Outfit',sans-serif; font-size: 0.85rem; font-weight: 600;
-  cursor: pointer; transition: all 0.2s;
-  box-shadow: 0 4px 14px var(--accent-glow);
-  margin-top: 10px;
-}
+.acc-btn.authed .acc-check { color: var(--green); border-color: rgba(34,197,94,0.4); }
+.login-btn { display: flex; align-items: center; gap: 7px; padding: 11px 18px; border-radius: 10px; border: none; background: var(--accent); color: white; font-family: 'Outfit',sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px var(--accent-glow); margin-top: 10px; }
 .login-btn:hover { background: var(--accent2); transform: translateY(-1px); }
 .login-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
-/* ── FORM FIELDS ── */
-.fields-grid { display: grid; gap: 11px; }
+/* Form */
+.fg { display: grid; gap: 11px; margin-bottom: 11px; }
 .r1 { grid-template-columns: 1fr; }
+.r2 { grid-template-columns: 1fr 1fr; }
 .r3 { grid-template-columns: 1fr 1fr 1fr; }
-
 .f { display: flex; flex-direction: column; gap: 5px; }
 label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
-input, textarea, select {
-  font-family: 'Outfit',sans-serif; font-size: 0.88rem;
-  padding: 9px 12px; border: 1px solid var(--border2);
-  border-radius: 9px; background: var(--surface2);
-  color: var(--text); outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
-}
+input, textarea, select { font-family: 'Outfit',sans-serif; font-size: 0.88rem; padding: 9px 12px; border: 1px solid var(--border2); border-radius: 9px; background: var(--surface2); color: var(--text); outline: none; transition: border-color 0.2s, box-shadow 0.2s; width: 100%; }
 input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-input:disabled, textarea:disabled, select:disabled { opacity: 0.35; cursor: not-allowed; }
+input:disabled, textarea:disabled, select:disabled { opacity: 0.3; cursor: not-allowed; }
 select option { background: var(--surface2); }
 textarea { resize: vertical; min-height: 68px; }
 
-/* ── CHIPS ── */
+/* Slots */
+.slot-item { background: var(--surface2); border: 1px solid var(--border2); border-radius: 11px; padding: 14px; margin-bottom: 9px; animation: fadeUp 0.2s ease; }
+.slot-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.slot-num { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent2); }
+.slot-del { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--border2); background: none; color: var(--text3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: all 0.2s; }
+.slot-del:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+.btn-add-slot { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; border-radius: 9px; border: 1px dashed var(--border2); background: none; color: var(--text3); font-family: 'Outfit',sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; width: 100%; margin-bottom: 11px; }
+.btn-add-slot:hover { border-color: var(--accent); color: var(--accent); }
+.btn-add-slot:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Chips */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; min-height: 28px; }
 .chip { display: flex; align-items: center; gap: 5px; padding: 3px 9px 3px 10px; background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.3); border-radius: 20px; font-size: 0.75rem; font-weight: 500; color: var(--accent2); animation: pop 0.15s ease; }
-@keyframes pop { from{opacity:0;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
 .chip-x { background: none; border: none; cursor: pointer; color: rgba(108,99,255,0.4); font-size: 0.85rem; display: flex; align-items: center; padding: 0; transition: color 0.15s; }
 .chip-x:hover { color: var(--red); }
 .add-row { display: flex; gap: 7px; }
@@ -125,103 +90,64 @@ textarea { resize: vertical; min-height: 68px; }
 .btn-sm { padding: 9px 13px; border: 1px solid var(--border2); border-radius: 9px; background: var(--surface2); color: var(--text2); font-family: 'Outfit',sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
 .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
 
-/* ── SUBMIT ── */
-.submit-row { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; gap: 12px; }
+/* Submit */
+.submit-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; gap: 12px; }
 .btn-ghost { padding: 11px 18px; border: 1px solid var(--border2); border-radius: 10px; background: none; color: var(--text3); font-family: 'Outfit',sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
 .btn-ghost:hover { color: var(--text2); }
-.btn-main { display: flex; align-items: center; gap: 8px; padding: 13px 26px; border-radius: 11px; border: none; background: var(--accent); color: white; font-family: 'Outfit',sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 18px var(--accent-glow); letter-spacing: -0.01em; }
+.btn-main { display: flex; align-items: center; gap: 8px; padding: 13px 26px; border-radius: 11px; border: none; background: var(--accent); color: white; font-family: 'Outfit',sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 18px var(--accent-glow); }
 .btn-main:hover { background: var(--accent2); transform: translateY(-1px); }
 .btn-main:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-
-/* ── SLOTS ── */
-.slot-item {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
-  gap: 10px;
-  align-items: end;
-  padding: 12px 14px;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 10px;
-  margin-bottom: 8px;
-  animation: pop 0.2s ease;
-}
-.slot-num {
-  grid-column: 1 / -1;
-  font-size: 0.68rem; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--accent2); margin-bottom: 2px;
-}
-.slot-del {
-  width: 32px; height: 32px;
-  border-radius: 8px; border: 1px solid var(--border2);
-  background: none; color: var(--text3);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; transition: all 0.2s; flex-shrink: 0;
-  align-self: end;
-}
-.slot-del:hover { border-color: var(--red); color: var(--red); }
-.btn-add-slot {
-  display: flex; align-items: center; gap: 6px;
-  padding: 9px 14px; border-radius: 9px;
-  border: 1px dashed var(--border2);
-  background: none; color: var(--text3);
-  font-family: 'Outfit',sans-serif; font-size: 0.82rem; font-weight: 500;
-  cursor: pointer; transition: all 0.2s;
-  width: 100%; justify-content: center;
-  margin-bottom: 11px;
-}
-.btn-add-slot:hover { border-color: var(--accent); color: var(--accent); }
-.btn-add-slot:disabled { opacity: 0.35; cursor: not-allowed; }
-
 .spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── PROGRESS ── */
+/* Progress */
 .prog { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-top: 14px; display: none; }
 .prog.show { display: block; animation: fadeUp 0.3s ease; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 .prog-lbl { font-size: 0.8rem; color: var(--text2); margin-bottom: 9px; display: flex; align-items: center; gap: 7px; }
 .prog-track { height: 2px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
-.prog-fill { height: 100%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 2px; transition: width 0.5s ease; width: 0%; }
+.prog-fill { height: 100%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 2px; transition: width 0.4s ease; width: 0%; }
 .steps { display: flex; gap: 7px; }
-.step { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); font-size: 0.7rem; font-weight: 500; color: var(--text3); transition: all 0.3s; }
+.step { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); font-size: 0.7rem; font-weight: 500; color: var(--text3); transition: all 0.3s; text-align: center; }
 .step.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.08); }
 .step.done { border-color: var(--green); color: var(--green); background: var(--green-bg); }
 
-/* ── RESULT ── */
+/* Result */
 .result { background: var(--surface); border: 1px solid var(--green); border-radius: 14px; padding: 24px; margin-top: 14px; display: none; box-shadow: 0 0 40px rgba(34,197,94,0.07); }
 .result.show { display: block; animation: fadeUp 0.35s ease; }
 .res-head { display: flex; align-items: center; gap: 11px; margin-bottom: 16px; }
 .res-ico { width: 36px; height: 36px; border-radius: 9px; background: var(--green-bg); border: 1px solid var(--green); display: flex; align-items: center; justify-content: center; color: var(--green); font-size: 1rem; flex-shrink: 0; }
-.res-title { font-size: 0.95rem; font-weight: 700; letter-spacing: -0.02em; }
+.res-title-main { font-size: 0.95rem; font-weight: 700; letter-spacing: -0.02em; }
 .res-sub { font-size: 0.75rem; color: var(--green); margin-top: 2px; }
-.res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 11px; }
-.res-item { padding: 10px 12px; background: var(--surface2); border-radius: 9px; border: 1px solid var(--border); }
-.res-lbl { font-size: 0.63rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 3px; }
-.res-val { font-size: 0.82rem; font-weight: 500; }
-.url-box { background: var(--surface2); border: 1px solid rgba(45,140,255,0.3); border-radius: 9px; padding: 11px 13px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.res-meeting-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.res-meeting-name { font-size: 1rem; font-weight: 700; margin-bottom: 14px; }
+
+/* Slot result items */
+.slot-result { background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.slot-result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.slot-result-num { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent2); }
+.slot-result-dt { font-size: 0.8rem; color: var(--text2); }
+.url-box { background: var(--bg); border: 1px solid rgba(45,140,255,0.3); border-radius: 9px; padding: 10px 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
 .url-l { flex: 1; min-width: 0; }
 .url-lbl { font-size: 0.63rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--zoom); margin-bottom: 3px; }
-.url-val { font-size: 0.8rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.copy-btn { flex-shrink: 0; padding: 6px 12px; background: var(--zoom); color: white; border: none; border-radius: 7px; font-family: 'Outfit',sans-serif; font-size: 0.73rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+.url-val { font-size: 0.78rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.copy-btn { flex-shrink: 0; padding: 5px 11px; background: var(--zoom); color: white; border: none; border-radius: 7px; font-family: 'Outfit',sans-serif; font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
 .copy-btn:hover { opacity: 0.85; }
-.act-row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
-.act-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: 1px solid; font-family: 'Outfit',sans-serif; font-size: 0.78rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.2s; background: none; }
-.act-btn:hover { transform: translateY(-1px); }
+.act-row { display: flex; gap: 7px; flex-wrap: wrap; }
+.act-btn { display: flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 8px; border: 1px solid; font-family: 'Outfit',sans-serif; font-size: 0.76rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.2s; background: none; }
 .act-btn.gcal { border-color: rgba(66,133,244,0.35); color: var(--gcal); }
 .act-btn.gcal:hover { background: rgba(66,133,244,0.08); }
 .act-btn.zoom { border-color: rgba(45,140,255,0.35); color: var(--zoom); }
 .act-btn.zoom:hover { background: rgba(45,140,255,0.08); }
+.act-btn.del { border-color: rgba(239,68,68,0.35); color: var(--red); }
+.act-btn.del:hover { background: var(--red-bg); }
 
-/* divider */
-.divider { height: 1px; background: var(--border); margin: 24px 0; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pop { from{opacity:0;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
 
 @media(max-width:580px){
   header{padding:0 16px;} main{padding:28px 14px 80px;}
-  .r3{grid-template-columns:1fr 1fr;} .res-grid{grid-template-columns:1fr;}
+  .r3{grid-template-columns:1fr 1fr;} .r2{grid-template-columns:1fr;}
   .steps{flex-direction:column;} .account-row{flex-direction:column;}
-  .acc-btn{min-width:unset;}
 }
 </style>
 </head>
@@ -253,24 +179,21 @@ textarea { resize: vertical; min-height: 68px; }
 
   <div class="divider"></div>
 
-  <!-- ② 会議情報 -->
+  <!-- ② 会議の基本情報 -->
   <div class="sec-label">② 会議の基本情報</div>
-  <div class="fields-grid r1" style="margin-bottom:11px;">
+
+  <div class="fg r1">
     <div class="f">
       <label>会議タイトル *</label>
       <input type="text" id="fTitle" placeholder="例：UXレビュー — クライアント名" disabled />
     </div>
   </div>
+
   <!-- 日程スロット -->
   <div id="slotList"></div>
   <button class="btn-add-slot" id="btnAddSlot" onclick="addSlot()" disabled>＋ 日程を追加</button>
-  <div class="fields-grid r1">
-    <div class="f">
-      <label>アジェンダ / メモ</label>
-      <textarea id="fDesc" placeholder="会議の目的や議題など（任意）" disabled></textarea>
-    </div>
-  </div>
-  <div class="fields-grid r1" style="margin-top:11px; margin-bottom:11px;">
+
+  <div class="fg r1">
     <div class="f">
       <label>繰り返し</label>
       <select id="fRecur" disabled>
@@ -282,12 +205,17 @@ textarea { resize: vertical; min-height: 68px; }
       </select>
     </div>
   </div>
-  <div id="recurOptions" style="display:none; margin-bottom:11px;">
-    <div class="fields-grid r1">
-      <div class="f">
-        <label>終了日</label>
-        <input type="date" id="fRecurEnd" disabled />
-      </div>
+  <div id="recurEndWrap" style="display:none;" class="fg r1">
+    <div class="f">
+      <label>繰り返し終了日</label>
+      <input type="date" id="fRecurEnd" disabled />
+    </div>
+  </div>
+
+  <div class="fg r1" style="margin-top:4px;">
+    <div class="f">
+      <label>アジェンダ / メモ</label>
+      <textarea id="fDesc" placeholder="会議の目的や議題など（任意）" disabled></textarea>
     </div>
   </div>
 
@@ -301,7 +229,6 @@ textarea { resize: vertical; min-height: 68px; }
     <button class="btn-sm" id="btnAddAtt" onclick="addChip()" disabled>＋ 追加</button>
   </div>
 
-  <!-- Submit -->
   <div class="submit-row">
     <button class="btn-ghost" onclick="resetForm()">リセット</button>
     <button class="btn-main" id="btnSubmit" onclick="doSubmit()" disabled>
@@ -329,42 +256,24 @@ textarea { resize: vertical; min-height: 68px; }
     <div class="res-head">
       <div class="res-ico">✓</div>
       <div>
-        <div class="res-title">会議の設定が完了しました！</div>
-        <div class="res-sub">Zoom URL生成 · カレンダー登録 完了</div>
+        <div class="res-title-main">会議の設定が完了しました！</div>
+        <div class="res-sub" id="resSubText">Zoom URL生成 · カレンダー登録 完了</div>
       </div>
     </div>
-    <div style="margin-bottom:12px;">
-      <div class="res-lbl">📋 タイトル</div>
-      <div class="res-val" id="rTitle" style="font-size:1rem;font-weight:700;margin-top:3px;">—</div>
-    </div>
-    <!-- 1件の場合 -->
-    <div id="singleResult">
-      <div class="res-grid" style="grid-template-columns:1fr;">
-        <div class="res-item"><div class="res-lbl">🕐 日時</div><div class="res-val" id="rDT">—</div></div>
-      </div>
-      <div class="url-box">
-        <div class="url-l">
-          <div class="url-lbl">📹 Zoom URL</div>
-          <div class="url-val" id="rUrl">—</div>
-        </div>
-        <button class="copy-btn" onclick="copyUrl()">コピー</button>
-      </div>
-      <div class="act-row">
-        <a class="act-btn gcal" id="rGcal" href="#" target="_blank">📅 カレンダーを開く</a>
-        <a class="act-btn zoom" id="rZoom" href="#" target="_blank">📹 Zoomを開く</a>
-      </div>
-    </div>
-    <!-- 複数の場合 -->
-    <div id="multiResults" style="display:none;"></div>
-    <div class="act-row" style="display:none;">
-      <button class="btn-ghost" style="margin-left:auto;" onclick="newMeeting()">＋ 新しい会議</button>
+    <div class="res-meeting-title">会議タイトル</div>
+    <div class="res-meeting-name" id="rMeetingTitle">—</div>
+    <div id="slotResults"></div>
+    <div style="text-align:right; margin-top:12px;">
+      <button class="btn-ghost" onclick="newMeeting()">＋ 新しい会議を作成</button>
     </div>
   </div>
 
 </main>
 
 <script>
-// ── CONFIG: アカウント追加はここだけ ──
+// ══════════════════════════════════════
+// CONFIG — アカウント追加はここだけ
+// ══════════════════════════════════════
 const ACCOUNTS = [
   {
     id: 'globalteam',
@@ -377,31 +286,40 @@ const ACCOUNTS = [
       clientSecret: 'TjS509Be3Wa6Uc5xoF31jU1rs3Y3PeuR'
     }
   }
-  // 追加例: { id: 'japan', name: 'Japan Team', email: 'archeco.japan@gmail.com', emoji: '🇯🇵', zoom: { accountId: '...', clientId: '...', clientSecret: '...' } }
 ];
 
-const CFG = {
-  CLIENT_ID: '187286115127-mhvei1kcpf9b9iq4p655adjn5h9ghdtb.apps.googleusercontent.com',
-  SCOPES: 'https://www.googleapis.com/auth/calendar.events'
+const GCAL_CLIENT_ID = '187286115127-mhvei1kcpf9b9iq4p655adjn5h9ghdtb.apps.googleusercontent.com';
+const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.events';
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+const S = {
+  selectedId: null,
+  token: null,
+  attendees: [],
+  slotCounter: 0,
+  slots: [],        // [{id, date, start, end}]
+  createdEvents: [] // for delete feature
 };
 
-const S = { selectedId: null, token: null, attendees: [], result: {} };
-
-// ── INIT ──
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
 renderAccounts();
-const tom = new Date(); tom.setDate(tom.getDate()+1);
-document.getElementById('fDate').value = tom.toISOString().split('T')[0];
-document.getElementById('fStart').value = '10:00';
-document.getElementById('fEnd').value = '11:00';
-document.getElementById('fAtt').addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();addChip();} });
-document.getElementById('fRecur').addEventListener('change', function() {
-  document.getElementById('recurOptions').style.display = this.value !== 'none' ? 'block' : 'none';
+document.getElementById('fAtt').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addChip(); }
 });
-handleCallback();
+document.getElementById('fRecur').addEventListener('change', function() {
+  document.getElementById('recurEndWrap').style.display = this.value !== 'none' ? 'block' : 'none';
+});
+handleOAuthCallback();
 restoreSession();
-addSlot(); // Add default first slot
+addSlot(); // デフォルト日程1を追加
 
-// ── RENDER ACCOUNTS ──
+// ══════════════════════════════════════
+// ACCOUNTS
+// ══════════════════════════════════════
 function renderAccounts() {
   document.getElementById('accountRow').innerHTML = ACCOUNTS.map(a => `
     <button class="acc-btn" id="acc-${a.id}" onclick="selectAcc('${a.id}')">
@@ -416,7 +334,7 @@ function renderAccounts() {
 }
 
 function selectAcc(id) {
-  if (S.token) return; // already logged in
+  if (S.token) return;
   S.selectedId = id;
   ACCOUNTS.forEach(a => {
     document.getElementById('acc-'+a.id).classList.remove('selected');
@@ -427,209 +345,220 @@ function selectAcc(id) {
   document.getElementById('loginBtn').disabled = false;
 }
 
-// ── AUTH ──
+// ══════════════════════════════════════
+// OAUTH
+// ══════════════════════════════════════
 function doLogin() {
   if (!S.selectedId) return;
   const acc = ACCOUNTS.find(a => a.id === S.selectedId);
-  sessionStorage.setItem('pendingId', S.selectedId);
-  const p = new URLSearchParams({
-    client_id: CFG.CLIENT_ID,
+  sessionStorage.setItem('pendingAccId', S.selectedId);
+  const params = new URLSearchParams({
+    client_id: GCAL_CLIENT_ID,
     redirect_uri: location.href.split('?')[0].split('#')[0],
     response_type: 'token',
-    scope: CFG.SCOPES,
+    scope: GCAL_SCOPES,
     login_hint: acc.email,
     prompt: 'select_account'
   });
-  location.href = `https://accounts.google.com/o/oauth2/v2/auth?${p}`;
+  location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
 }
 
-function handleCallback() {
+function handleOAuthCallback() {
   if (!location.hash.includes('access_token')) return;
-  const p = new URLSearchParams(location.hash.substring(1));
-  const token = p.get('access_token');
-  const id = sessionStorage.getItem('pendingId');
+  const params = new URLSearchParams(location.hash.substring(1));
+  const token = params.get('access_token');
+  const accId = sessionStorage.getItem('pendingAccId');
   history.replaceState(null, '', location.pathname);
-  if (!token || !id) return;
-  sessionStorage.removeItem('pendingId');
-  sessionStorage.setItem('token', token);
-  sessionStorage.setItem('accId', id);
-  applyLogin(id, token);
+  if (!token || !accId) return;
+  sessionStorage.removeItem('pendingAccId');
+  sessionStorage.setItem('gcalToken', token);
+  sessionStorage.setItem('gcalAccId', accId);
+  applyLogin(accId, token);
 }
 
 function restoreSession() {
-  const token = sessionStorage.getItem('token');
-  const id = sessionStorage.getItem('accId');
-  if (token && id) applyLogin(id, token);
+  const token = sessionStorage.getItem('gcalToken');
+  const accId = sessionStorage.getItem('gcalAccId');
+  if (token && accId) applyLogin(accId, token);
 }
 
-function applyLogin(id, token) {
+function applyLogin(accId, token) {
   S.token = token;
-  S.selectedId = id;
-  const acc = ACCOUNTS.find(a => a.id === id);
+  S.selectedId = accId;
+  const acc = ACCOUNTS.find(a => a.id === accId);
+  if (!acc) return;
 
-  // Update account card
-  document.getElementById('acc-'+id).classList.remove('selected');
-  document.getElementById('acc-'+id).classList.add('authed');
-  document.getElementById('acc-check-'+id).textContent = '✓ ログイン済み';
-  document.getElementById('acc-email-'+id).textContent = acc.email;
-
-  // Hide login button
+  // Update UI
+  document.getElementById('acc-'+accId).classList.remove('selected');
+  document.getElementById('acc-'+accId).classList.add('authed');
+  document.getElementById('acc-check-'+accId).textContent = '✓ ログイン済み';
   document.getElementById('loginBtn').style.display = 'none';
 
-  // Enable form
+  // Enable form fields
   ['fTitle','fDesc','fAtt','fRecur','fRecurEnd'].forEach(id => {
-    document.getElementById(id).disabled = false;
+    const el = document.getElementById(id);
+    if (el) el.disabled = false;
   });
   document.getElementById('btnAddAtt').disabled = false;
   document.getElementById('btnSubmit').disabled = false;
   document.getElementById('btnAddSlot').disabled = false;
+
   // Enable existing slot inputs
   document.querySelectorAll('.slot-input').forEach(el => el.disabled = false);
 
   // Status pill
-  const pill = document.getElementById('statusPill');
-  pill.classList.add('on');
+  document.getElementById('statusPill').classList.add('on');
   document.getElementById('statusTxt').textContent = acc.name;
 }
 
-// ── ATTENDEES ──
+// ══════════════════════════════════════
+// SLOTS
+// ══════════════════════════════════════
+function addSlot() {
+  const id = ++S.slotCounter;
+  S.slots.push(id);
+
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const defaultDate = tomorrow.toISOString().split('T')[0];
+  const isEnabled = !!S.token;
+
+  const div = document.createElement('div');
+  div.className = 'slot-item';
+  div.id = 'slot-' + id;
+  div.innerHTML = `
+    <div class="slot-header">
+      <span class="slot-num" id="slot-num-${id}">日程 ${S.slots.length}</span>
+      <button class="slot-del" onclick="removeSlot(${id})" title="この日程を削除">×</button>
+    </div>
+    <div class="fg r3">
+      <div class="f">
+        <label>日付 *</label>
+        <input type="date" class="slot-input" id="slot-date-${id}" value="${defaultDate}" ${isEnabled ? '' : 'disabled'} />
+      </div>
+      <div class="f">
+        <label>開始時間 *</label>
+        <input type="time" class="slot-input" id="slot-start-${id}" value="10:00" ${isEnabled ? '' : 'disabled'} />
+      </div>
+      <div class="f">
+        <label>終了時間 *</label>
+        <input type="time" class="slot-input" id="slot-end-${id}" value="11:00" ${isEnabled ? '' : 'disabled'} />
+      </div>
+    </div>
+  `;
+  document.getElementById('slotList').appendChild(div);
+  updateSlotNumbers();
+}
+
+function removeSlot(id) {
+  if (S.slots.length <= 1) {
+    alert('日程は最低1つ必要です。');
+    return;
+  }
+  S.slots = S.slots.filter(s => s !== id);
+  document.getElementById('slot-' + id).remove();
+  updateSlotNumbers();
+}
+
+function updateSlotNumbers() {
+  S.slots.forEach((id, i) => {
+    const el = document.getElementById('slot-num-' + id);
+    if (el) el.textContent = '日程 ' + (i + 1);
+  });
+}
+
+// ══════════════════════════════════════
+// ATTENDEES
+// ══════════════════════════════════════
 function addChip() {
   const inp = document.getElementById('fAtt');
-  const v = inp.value.trim();
-  if (!v || !v.includes('@') || S.attendees.includes(v)) { inp.value=''; return; }
-  S.attendees.push(v); renderChips(); inp.value='';
+  const val = inp.value.trim();
+  if (!val || !val.includes('@') || S.attendees.includes(val)) { inp.value = ''; return; }
+  S.attendees.push(val);
+  renderChips();
+  inp.value = '';
 }
-function removeChip(e) { S.attendees = S.attendees.filter(x=>x!==e); renderChips(); }
+
+function removeChip(email) {
+  S.attendees = S.attendees.filter(e => e !== email);
+  renderChips();
+}
+
 function renderChips() {
   document.getElementById('chipList').innerHTML = S.attendees.map(e =>
     `<div class="chip"><span>${e}</span><button class="chip-x" onclick="removeChip('${e}')">×</button></div>`
   ).join('');
 }
 
-// ── SLOTS ──
-let slotId = 0;
-const slots = [];
-
-function addSlot() {
-  const id = ++slotId;
-  const isFirst = slots.length === 0;
-  const tom = new Date(); tom.setDate(tom.getDate()+1);
-  const defaultDate = tom.toISOString().split('T')[0];
-  const isLoggedIn = !!S.token;
-
-  slots.push(id);
-
-  const div = document.createElement('div');
-  div.className = 'slot-item';
-  div.id = 'slot-' + id;
-  div.innerHTML = `
-    <div class="slot-num">日程 ${slots.length}</div>
-    <div class="f">
-      <label>日付</label>
-      <input type="date" class="slot-input" id="slot-date-${id}" value="${defaultDate}" ${isLoggedIn ? '' : 'disabled'} />
-    </div>
-    <div class="f">
-      <label>開始時間</label>
-      <input type="time" class="slot-input" id="slot-start-${id}" value="10:00" ${isLoggedIn ? '' : 'disabled'} />
-    </div>
-    <div class="f">
-      <label>終了時間</label>
-      <input type="time" class="slot-input" id="slot-end-${id}" value="11:00" ${isLoggedIn ? '' : 'disabled'} />
-    </div>
-    ${slots.length > 1 ? `<button class="slot-del" onclick="removeSlot(${id})">×</button>` : '<div></div>'}
-  `;
-  document.getElementById('slotList').appendChild(div);
-  renumberSlots();
-}
-
-function removeSlot(id) {
-  const idx = slots.indexOf(id);
-  if (idx > -1) slots.splice(idx, 1);
-  document.getElementById('slot-' + id).remove();
-  renumberSlots();
-}
-
-function renumberSlots() {
-  slots.forEach((id, i) => {
-    const numEl = document.querySelector(`#slot-${id} .slot-num`);
-    if (numEl) numEl.textContent = `日程 ${i + 1}`;
-    // Show/hide delete button
-    const delBtn = document.querySelector(`#slot-${id} .slot-del`);
-    if (i === 0 && slots.length === 1) {
-      if (delBtn) delBtn.style.display = 'none';
-    } else {
-      if (delBtn) delBtn.style.display = 'flex';
-    }
-  });
-}
-
-// ── SUBMIT ──
+// ══════════════════════════════════════
+// SUBMIT
+// ══════════════════════════════════════
 async function doSubmit() {
   const title = document.getElementById('fTitle').value.trim();
-  const date  = document.getElementById('fDate').value;
-  const start = document.getElementById('fStart').value;
-  const end   = document.getElementById('fEnd').value;
-  const desc  = document.getElementById('fDesc').value.trim();
+  if (!title) { alert('会議タイトルを入力してください。'); return; }
+  if (S.slots.length === 0) { alert('日程を1つ以上追加してください。'); return; }
 
-  if (!title) { alert('タイトルは必須です。'); return; }
-  if (slots.length === 0) { alert('日程を1つ以上追加してください。'); return; }
-
-  // Validate all slots
-  for (const sid of slots) {
-    const d = document.getElementById('slot-date-'+sid)?.value;
-    const s = document.getElementById('slot-start-'+sid)?.value;
-    const e = document.getElementById('slot-end-'+sid)?.value;
+  // Validate slots
+  for (const sid of S.slots) {
+    const d = document.getElementById('slot-date-' + sid)?.value;
+    const s = document.getElementById('slot-start-' + sid)?.value;
+    const e = document.getElementById('slot-end-' + sid)?.value;
     if (!d || !s || !e) { alert('すべての日程に日付と時間を入力してください。'); return; }
   }
 
   const acc = ACCOUNTS.find(a => a.id === S.selectedId);
+  const desc = document.getElementById('fDesc').value.trim();
+  const recur = document.getElementById('fRecur').value;
+  const recurEnd = document.getElementById('fRecurEnd').value;
+
+  // UI: loading
   const btn = document.getElementById('btnSubmit');
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div><span>処理中...</span>';
+  document.getElementById('progCard').classList.add('show');
+  document.getElementById('progFill').style.width = '5%';
+  document.getElementById('progLbl').textContent = '準備中...';
+  setStep(1, 'active');
+  await sleep(300);
 
-  const pc = document.getElementById('progCard'); pc.classList.add('show');
-  const pf = document.getElementById('progFill');
-  const pl = document.getElementById('progLbl');
-  setStep(1,'active'); pf.style.width='5%'; pl.textContent='準備中...';
-  await sleep(400);
-
-  const recur = document.getElementById('fRecur').value;
-  const recurEnd = document.getElementById('fRecurEnd').value;
   const results = [];
+  S.createdEvents = [];
 
-  for (let i = 0; i < slots.length; i++) {
-    const sid = slots[i];
-    const date  = document.getElementById('slot-date-'+sid).value;
-    const start = document.getElementById('slot-start-'+sid).value;
-    const end   = document.getElementById('slot-end-'+sid).value;
+  for (let i = 0; i < S.slots.length; i++) {
+    const sid = S.slots[i];
+    const date  = document.getElementById('slot-date-' + sid).value;
+    const start = document.getElementById('slot-start-' + sid).value;
+    const end   = document.getElementById('slot-end-' + sid).value;
     const startISO = `${date}T${start}:00+09:00`;
     const endISO   = `${date}T${end}:00+09:00`;
-    const progress = Math.round(((i + 0.3) / slots.length) * 80) + 5;
 
-    pl.textContent = `📹 日程${i+1}/${slots.length} Zoom生成中...`;
-    pf.style.width = progress + '%';
-    setStep(1, i === slots.length-1 ? 'done' : 'active');
+    const pct = Math.round(((i + 0.3) / S.slots.length) * 85) + 5;
+    document.getElementById('progFill').style.width = pct + '%';
+    document.getElementById('progLbl').textContent = `📹 日程${i+1}/${S.slots.length} Zoom生成中...`;
+    setStep(1, 'active');
 
+    // Create Zoom meeting
     let zoomUrl = null;
     try {
-      zoomUrl = await createZoomMeeting(acc.zoom, title, startISO, end, date);
-    } catch(e) { console.warn('Zoom error:', e); }
-
+      zoomUrl = await createZoomMeeting(acc.zoom, title, date, start, end);
+    } catch(e) {
+      console.warn('Zoom error:', e.message);
+    }
     if (!zoomUrl) {
-      const id = Math.floor(Math.random()*9e9)+1e9;
-      zoomUrl = `https://zoom.us/j/${id}?pwd=${Math.random().toString(36).slice(2,10)}`;
+      const fakeId = Math.floor(Math.random() * 9e9) + 1e9;
+      zoomUrl = `https://zoom.us/j/${fakeId}?pwd=${Math.random().toString(36).slice(2,10)}`;
     }
 
-    setStep(2,'active');
-    pl.textContent = `📅 日程${i+1}/${slots.length} カレンダー登録中...`;
-    pf.style.width = Math.round(((i + 0.7) / slots.length) * 80) + 5 + '%';
+    setStep(1, 'done'); setStep(2, 'active');
+    document.getElementById('progLbl').textContent = `📅 日程${i+1}/${S.slots.length} カレンダー登録中...`;
+    document.getElementById('progFill').style.width = (Math.round(((i + 0.7) / S.slots.length) * 85) + 5) + '%';
 
-    const fullDesc = `📹 Zoom URL: ${zoomUrl}${desc ? '
-
-'+desc : ''}`;
+    // Create calendar event
+    const fullDesc = `📹 Zoom URL: ${zoomUrl}${desc ? '\n\n' + desc : ''}`;
     let gcalLink = null;
+    let eventId = null;
     try {
-      const eventBody = {
+      const body = {
         summary: title,
         description: fullDesc,
         start: { dateTime: startISO, timeZone: 'Asia/Tokyo' },
@@ -637,51 +566,62 @@ async function doSubmit() {
         attendees: S.attendees.map(e => ({ email: e }))
       };
       if (recur !== 'none' && recurEnd) {
-        const untilDate = recurEnd.replace(/-/g,'') + 'T000000Z';
-        const ruleMap = { daily:'RRULE:FREQ=DAILY', weekly:'RRULE:FREQ=WEEKLY', biweekly:'RRULE:FREQ=WEEKLY;INTERVAL=2', monthly:'RRULE:FREQ=MONTHLY' };
-        eventBody.recurrence = [`${ruleMap[recur]};UNTIL=${untilDate}`];
+        const until = recurEnd.replace(/-/g, '') + 'T000000Z';
+        const ruleMap = { daily: 'DAILY', weekly: 'WEEKLY', biweekly: 'WEEKLY;INTERVAL=2', monthly: 'MONTHLY' };
+        body.recurrence = [`RRULE:FREQ=${ruleMap[recur]};UNTIL=${until}`];
       }
-      const ev = await apiPost(acc.email, eventBody, false);
+      const ev = await gcalCreateEvent(acc.email, body);
       gcalLink = ev.htmlLink;
+      eventId = ev.id;
+      S.createdEvents.push({ eventId, calId: acc.email, title, date, start, gcalLink });
     } catch(e) {
-      console.warn('Calendar error:', e);
+      console.warn('Calendar error:', e.message);
       gcalLink = buildGcalUrl(title, date, start, end, fullDesc);
     }
 
-    results.push({ date, start, end, zoomUrl, gcalLink });
-    await sleep(200);
+    results.push({ date, start, end, zoomUrl, gcalLink, eventId });
+    await sleep(150);
   }
 
-  setStep(1,'done'); setStep(2,'done'); setStep(3,'done');
-  pf.style.width='100%'; pl.textContent='✅ 完了！';
+  setStep(2, 'done'); setStep(3, 'done');
+  document.getElementById('progFill').style.width = '100%';
+  document.getElementById('progLbl').textContent = '✅ 完了！';
   await sleep(400);
 
-  S.result = { title, results };
-  showResult();
+  showResult(title, results);
 
   btn.disabled = false;
   btn.innerHTML = '<span>会議を作成</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
 }
 
-// ── ZOOM API ──
-async function createZoomMeeting(zoomCfg, title, startISO, end, date) {
-  // Get access token via Server-to-Server OAuth
-  const tokenRes = await fetch('https://zoom.us/oauth/token?grant_type=account_credentials&account_id=' + zoomCfg.accountId, {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Basic ' + btoa(zoomCfg.clientId + ':' + zoomCfg.clientSecret),
-      'Content-Type': 'application/x-www-form-urlencoded'
+// ══════════════════════════════════════
+// ZOOM API
+// ══════════════════════════════════════
+async function createZoomMeeting(zoomCfg, title, date, start, end) {
+  // Get token
+  const tokenRes = await fetch(
+    'https://zoom.us/oauth/token?grant_type=account_credentials&account_id=' + zoomCfg.accountId,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + btoa(zoomCfg.clientId + ':' + zoomCfg.clientSecret),
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     }
-  });
+  );
   const tokenData = await tokenRes.json();
-  if (!tokenData.access_token) throw new Error('Zoom token error: ' + JSON.stringify(tokenData));
+  if (!tokenData.access_token) throw new Error('Zoom token failed: ' + JSON.stringify(tokenData));
 
-  // Calculate duration in minutes
-  const [sh, sm] = startISO.split('T')[1].split(':').map(Number);
+  // Calculate duration
+  const [sh, sm] = start.split(':').map(Number);
   const [eh, em] = end.split(':').map(Number);
-  const duration = (eh * 60 + em) - (sh * 60 + sm);
+  const duration = Math.max((eh * 60 + em) - (sh * 60 + sm), 30);
 
-  // Create meeting on behalf of archeco.globalteam
+  // Start time in UTC
+  const startLocal = new Date(`${date}T${start}:00+09:00`);
+  const startUTC = startLocal.toISOString().replace('.000Z', 'Z');
+
+  // Create meeting on behalf of globalteam
   const hostEmail = encodeURIComponent('archeco.globalteam@gmail.com');
   const meetRes = await fetch(`https://api.zoom.us/v2/users/${hostEmail}/meetings`, {
     method: 'POST',
@@ -692,115 +632,150 @@ async function createZoomMeeting(zoomCfg, title, startISO, end, date) {
     body: JSON.stringify({
       topic: title,
       type: 2,
-      start_time: startISO.replace('+09:00', '') + 'Z',
-      duration: duration > 0 ? duration : 60,
+      start_time: startUTC,
+      duration,
       timezone: 'Asia/Tokyo',
       settings: { host_video: true, participant_video: true, join_before_host: false }
     })
   });
   const meetData = await meetRes.json();
-  if (!meetData.join_url) throw new Error('Zoom meeting error: ' + JSON.stringify(meetData));
+  if (!meetData.join_url) throw new Error('Zoom meeting failed: ' + JSON.stringify(meetData));
   return meetData.join_url;
 }
 
-async function apiPost(calId, body, withConf) {
-  const qs = withConf ? '?conferenceDataVersion=1&sendUpdates=all' : '?sendUpdates=all';
+// ══════════════════════════════════════
+// GOOGLE CALENDAR API
+// ══════════════════════════════════════
+async function gcalCreateEvent(calId, body) {
   const res = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events${qs}`,
-    { method:'POST', headers:{ Authorization:`Bearer ${S.token}`, 'Content-Type':'application/json' }, body: JSON.stringify(body) }
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events?sendUpdates=all`,
+    {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }
   );
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error?.message || 'API error');
+  if (!res.ok) throw new Error(data.error?.message || 'Calendar API error');
   return data;
 }
 
-function extractZoom(ev) {
-  const cd = ev.conferenceData;
-  if (cd?.entryPoints) {
-    const v = cd.entryPoints.find(e => e.entryPointType === 'video');
-    if (v?.uri) return v.uri;
-  }
-  return (ev.description||'').match(/https:\/\/[\w.]*zoom\.us\/j\/[\w?=&]+/)?.[0] || null;
+async function gcalDeleteEvent(calId, eventId) {
+  const res = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events/${eventId}`,
+    { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + S.token } }
+  );
+  return res.ok || res.status === 204;
 }
 
 function buildGcalUrl(title, date, start, end, desc) {
-  const s = `${date.replace(/-/g,'')}T${start.replace(':','')}00`;
-  const e = `${date.replace(/-/g,'')}T${end.replace(':','')}00`;
+  const s = date.replace(/-/g,'') + 'T' + start.replace(':','') + '00';
+  const e = date.replace(/-/g,'') + 'T' + end.replace(':','') + '00';
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${s}/${e}&details=${encodeURIComponent(desc||'')}`;
 }
 
-function setStep(n,s) {
-  document.getElementById('st'+n).className = 'step'+(s==='active'?' active':s==='done'?' done':'');
-}
-function fmtDT(date,start,end) {
-  return new Date(`${date}T${start}`).toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'short'})+` ${start}〜${end}`;
-}
-function showResult() {
-  document.getElementById('rTitle').textContent = S.result.title;
-  const r = S.result.results;
-
-  // Single slot: show simple view
-  if (r.length === 1) {
-    document.getElementById('rDT').textContent = fmtDT(r[0].date, r[0].start, r[0].end);
-    document.getElementById('rUrl').textContent = r[0].zoomUrl || '（生成失敗）';
-    if (r[0].zoomUrl) document.getElementById('rZoom').href = r[0].zoomUrl;
-    if (r[0].gcalLink) document.getElementById('rGcal').href = r[0].gcalLink;
-    document.getElementById('multiResults').style.display = 'none';
-    document.getElementById('singleResult').style.display = 'block';
-  } else {
-    // Multiple slots
-    document.getElementById('singleResult').style.display = 'none';
-    document.getElementById('multiResults').style.display = 'block';
-    document.getElementById('multiResults').innerHTML = r.map((item, i) => `
-      <div class="res-item" style="margin-bottom:8px; padding:14px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-          <div style="font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent2);">日程 ${i+1}</div>
-          <div style="font-size:0.78rem; color:var(--text2);">${fmtDT(item.date, item.start, item.end)}</div>
-        </div>
-        <div class="url-box" style="margin-bottom:6px;">
-          <div class="url-l">
-            <div class="url-lbl">📹 Zoom URL</div>
-            <div class="url-val">${item.zoomUrl || '（生成失敗）'}</div>
-          </div>
-          <button class="copy-btn" onclick="navigator.clipboard?.writeText('${item.zoomUrl}').then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='コピー',1500)})">コピー</button>
-        </div>
-        <div class="act-row">
-          ${item.gcalLink ? `<a class="act-btn gcal" href="${item.gcalLink}" target="_blank">📅 カレンダー</a>` : ''}
-          ${item.zoomUrl ? `<a class="act-btn zoom" href="${item.zoomUrl}" target="_blank">📹 Zoom</a>` : ''}
-        </div>
-      </div>
-    `).join('');
+// ══════════════════════════════════════
+// DELETE EVENT
+// ══════════════════════════════════════
+async function deleteEvent(eventId, calId, btn) {
+  if (!confirm('この予定をGoogleカレンダーから削除しますか？')) return;
+  btn.textContent = '削除中...';
+  btn.disabled = true;
+  try {
+    const ok = await gcalDeleteEvent(calId, eventId);
+    if (ok) {
+      btn.closest('.slot-result').style.opacity = '0.4';
+      btn.textContent = '削除済み';
+      btn.style.color = 'var(--text3)';
+    } else {
+      btn.textContent = 'エラー';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    console.warn('Delete error:', e);
+    btn.textContent = 'エラー';
+    btn.disabled = false;
   }
+}
+
+// ══════════════════════════════════════
+// RESULT
+// ══════════════════════════════════════
+function showResult(title, results) {
+  const acc = ACCOUNTS.find(a => a.id === S.selectedId);
+  document.getElementById('rMeetingTitle').textContent = title;
+  document.getElementById('resSubText').textContent =
+    `${results.length}件の日程 · Zoom URL生成 · カレンダー登録 完了`;
+
+  document.getElementById('slotResults').innerHTML = results.map((r, i) => `
+    <div class="slot-result" id="sr-${i}">
+      <div class="slot-result-header">
+        <span class="slot-result-num">日程 ${i+1}</span>
+        <span class="slot-result-dt">${fmtDT(r.date, r.start, r.end)}</span>
+      </div>
+      <div class="url-box">
+        <div class="url-l">
+          <div class="url-lbl">📹 Zoom URL</div>
+          <div class="url-val">${r.zoomUrl}</div>
+        </div>
+        <button class="copy-btn" onclick="copyText('${r.zoomUrl}', this)">コピー</button>
+      </div>
+      <div class="act-row">
+        ${r.gcalLink ? `<a class="act-btn gcal" href="${r.gcalLink}" target="_blank">📅 カレンダー</a>` : ''}
+        ${r.zoomUrl ? `<a class="act-btn zoom" href="${r.zoomUrl}" target="_blank">📹 Zoom</a>` : ''}
+        ${r.eventId ? `<button class="act-btn del" onclick="deleteEvent('${r.eventId}', '${acc.email}', this)">🗑 削除</button>` : ''}
+      </div>
+    </div>
+  `).join('');
 
   document.getElementById('resultCard').classList.add('show');
-  document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-function copyUrl() {
-  navigator.clipboard?.writeText(document.getElementById('rUrl').textContent).then(()=>{
-    const b = document.querySelector('.copy-btn');
-    b.textContent='コピー済み ✓'; setTimeout(()=>b.textContent='コピー',2000);
+
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function copyText(text, btn) {
+  navigator.clipboard?.writeText(text).then(() => {
+    btn.textContent = '✓';
+    setTimeout(() => btn.textContent = 'コピー', 1500);
   });
 }
-function resetForm() {
-  ['fTitle','fDesc','fAtt'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fRecur').value = 'none';
-  document.getElementById('recurOptions').style.display = 'none';
-  // Reset slots
-  slots.length = 0;
-  slotId = 0;
-  document.getElementById('slotList').innerHTML = '';
-  addSlot(); // add default first slot
-  S.attendees=[]; renderChips();
+
+function setStep(n, state) {
+  const el = document.getElementById('st' + n);
+  el.className = 'step' + (state === 'active' ? ' active' : state === 'done' ? ' done' : '');
 }
+
+function fmtDT(date, start, end) {
+  const d = new Date(`${date}T${start}`);
+  return d.toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'short' }) + ` ${start}〜${end}`;
+}
+
+function resetForm() {
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fAtt').value = '';
+  document.getElementById('fRecur').value = 'none';
+  document.getElementById('recurEndWrap').style.display = 'none';
+  S.attendees = [];
+  renderChips();
+  S.slots = [];
+  S.slotCounter = 0;
+  document.getElementById('slotList').innerHTML = '';
+  addSlot();
+}
+
 function newMeeting() {
   document.getElementById('resultCard').classList.remove('show');
   document.getElementById('progCard').classList.remove('show');
-  document.getElementById('progFill').style.width='0%';
-  [1,2,3].forEach(n=>setStep(n,''));
+  document.getElementById('progFill').style.width = '0%';
+  [1, 2, 3].forEach(n => setStep(n, ''));
   resetForm();
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 </script>
 </body>
 </html>
