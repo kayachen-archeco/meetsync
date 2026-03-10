@@ -297,8 +297,18 @@ textarea { resize: vertical; min-height: 68px; }
 <script>
 // ── CONFIG: アカウント追加はここだけ ──
 const ACCOUNTS = [
-  { id: 'globalteam', name: 'Global Team', email: 'archeco.globalteam@gmail.com', emoji: '🌐' }
-  // 追加例: { id: 'japan', name: 'Japan Team', email: 'archeco.japan@gmail.com', emoji: '🇯🇵' }
+  {
+    id: 'globalteam',
+    name: 'Global Team',
+    email: 'archeco.globalteam@gmail.com',
+    emoji: '🌐',
+    zoom: {
+      accountId: 'kamrnzDMTTWdIbTtpaw2LA',
+      clientId: 'aUveJMT6RfyoDZSWMmNhcg',
+      clientSecret: 'TjS509Be3Wa6Uc5xoF31jU1rs3Y3PeuR'
+    }
+  }
+  // 追加例: { id: 'japan', name: 'Japan Team', email: 'archeco.japan@gmail.com', emoji: '🇯🇵', zoom: { accountId: '...', clientId: '...', clientSecret: '...' } }
 ];
 
 const CFG = {
@@ -448,37 +458,33 @@ async function doSubmit() {
   pl.textContent = '📹 Zoom URLを生成中...';
   pf.style.width = '35%';
 
+  // STEP 1: Zoom API で直接ミーティング作成
   try {
-    const ev = await apiPost(acc.email, {
-      summary: title,
-      description: desc,
-      start: { dateTime: startISO, timeZone: 'Asia/Tokyo' },
-      end:   { dateTime: endISO,   timeZone: 'Asia/Tokyo' },
-      attendees: S.attendees.map(e => ({ email: e })),
-      conferenceData: {
-        createRequest: { requestId: `zm-${Date.now()}`, conferenceSolutionKey: { type: 'addOn' } }
-      }
-    }, true);
-
-    zoomUrl = extractZoom(ev);
-    S.result.gcalLink = ev.htmlLink;
-
-    if (zoomUrl && ev.id) {
-      const updatedDesc = `📹 Zoom URL: ${zoomUrl}${desc ? '\n\n'+desc : ''}`;
-      await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(acc.email)}/events/${ev.id}`,
-        { method:'PATCH', headers:{ Authorization:`Bearer ${S.token}`, 'Content-Type':'application/json' }, body: JSON.stringify({ description: updatedDesc }) }
-      );
-    }
+    zoomUrl = await createZoomMeeting(acc.zoom, title, startISO, end, date);
   } catch(e) {
-    console.warn('API error:', e);
-    S.result.gcalLink = buildGcalUrl(title, date, start, end, desc);
+    console.warn('Zoom API error:', e);
   }
 
   if (!zoomUrl) {
     await sleep(400);
     const id = Math.floor(Math.random()*9e9)+1e9;
     zoomUrl = `https://zoom.us/j/${id}?pwd=${Math.random().toString(36).slice(2,10)}`;
+  }
+
+  // STEP 2: Google Calendar にイベント作成（Zoom URLを説明に挿入）
+  const fullDesc = `📹 Zoom URL: ${zoomUrl}${desc ? '\n\n'+desc : ''}`;
+  try {
+    const ev = await apiPost(acc.email, {
+      summary: title,
+      description: fullDesc,
+      start: { dateTime: startISO, timeZone: 'Asia/Tokyo' },
+      end:   { dateTime: endISO,   timeZone: 'Asia/Tokyo' },
+      attendees: S.attendees.map(e => ({ email: e }))
+    }, false);
+    S.result.gcalLink = ev.htmlLink;
+  } catch(e) {
+    console.warn('Calendar API error:', e);
+    S.result.gcalLink = buildGcalUrl(title, date, start, end, fullDesc);
   }
 
   setStep(1,'done'); setStep(2,'active');
@@ -494,6 +500,45 @@ async function doSubmit() {
 
   btn.disabled = false;
   btn.innerHTML = '<span>会議を作成</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+}
+
+// ── ZOOM API ──
+async function createZoomMeeting(zoomCfg, title, startISO, end, date) {
+  // Get access token via Server-to-Server OAuth
+  const tokenRes = await fetch('https://zoom.us/oauth/token?grant_type=account_credentials&account_id=' + zoomCfg.accountId, {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Basic ' + btoa(zoomCfg.clientId + ':' + zoomCfg.clientSecret),
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  });
+  const tokenData = await tokenRes.json();
+  if (!tokenData.access_token) throw new Error('Zoom token error: ' + JSON.stringify(tokenData));
+
+  // Calculate duration in minutes
+  const [sh, sm] = startISO.split('T')[1].split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  const duration = (eh * 60 + em) - (sh * 60 + sm);
+
+  // Create meeting
+  const meetRes = await fetch('https://api.zoom.us/v2/users/me/meetings', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + tokenData.access_token,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      topic: title,
+      type: 2,
+      start_time: startISO.replace('+09:00', '') + 'Z',
+      duration: duration > 0 ? duration : 60,
+      timezone: 'Asia/Tokyo',
+      settings: { host_video: true, participant_video: true, join_before_host: false }
+    })
+  });
+  const meetData = await meetRes.json();
+  if (!meetData.join_url) throw new Error('Zoom meeting error: ' + JSON.stringify(meetData));
+  return meetData.join_url;
 }
 
 async function apiPost(calId, body, withConf) {
