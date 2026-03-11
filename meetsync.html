@@ -818,11 +818,13 @@ async function gcalCheckConflicts() {
       body: JSON.stringify({
         timeMin, timeMax,
         timeZone: 'Asia/Tokyo',
-        items: [{ id: 'primary' }]
+        items: [{ id: 'kaya.chen.archeco.01@gmail.com' }]
       })
     });
     const data = await res.json();
-    busyPeriods = data?.calendars?.primary?.busy || [];
+    console.log('[MeetSync] FreeBusy response:', JSON.stringify(data));
+    busyPeriods = data?.calendars?.['kaya.chen.archeco.01@gmail.com']?.busy || [];
+    console.log('[MeetSync] busyPeriods:', busyPeriods);
   } catch(e) {
     console.warn('FreeBusy API error:', e);
     return []; // エラー時はスキップして続行
