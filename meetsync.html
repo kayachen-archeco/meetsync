@@ -159,6 +159,27 @@ textarea { resize: vertical; min-height: 68px; }
 .freq-chip-del:hover { color: var(--red); }
 .freq-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
 
+/* Conflict check */
+.conflict-banner { display: none; margin-top: 14px; border-radius: 11px; overflow: hidden; animation: fadeUp 0.25s ease; }
+.conflict-banner.show { display: block; }
+.conflict-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.35); border-bottom: none; border-radius: 11px 11px 0 0; }
+.conflict-header-ico { font-size: 1rem; }
+.conflict-header-txt { font-size: 0.82rem; font-weight: 700; color: var(--red); flex: 1; }
+.conflict-header-sub { font-size: 0.7rem; color: rgba(239,68,68,0.7); }
+.conflict-list { border: 1px solid rgba(239,68,68,0.35); border-top: none; border-radius: 0 0 11px 11px; overflow: hidden; }
+.conflict-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+.conflict-item:last-child { border-bottom: none; }
+.conflict-slot-tag { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--red); background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); padding: 2px 7px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
+.conflict-event-name { font-size: 0.8rem; color: var(--text); font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conflict-event-time { font-size: 0.7rem; color: var(--text3); white-space: nowrap; flex-shrink: 0; }
+.conflict-actions { display: flex; gap: 8px; padding: 12px 16px; background: var(--surface); border: 1px solid rgba(239,68,68,0.35); border-top: none; border-radius: 0 0 11px 11px; }
+.conflict-btn-cancel { flex: 1; padding: 9px; border-radius: 8px; border: 1px solid var(--border2); background: none; color: var(--text2); font-family: 'Outfit',sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.conflict-btn-cancel:hover { border-color: var(--text2); color: var(--text); }
+.conflict-btn-proceed { flex: 1; padding: 9px; border-radius: 8px; border: none; background: var(--red); color: white; font-family: 'Outfit',sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.conflict-btn-proceed:hover { opacity: 0.85; }
+.conflict-ok-banner { display: none; align-items: center; gap: 8px; padding: 10px 14px; background: var(--green-bg); border: 1px solid rgba(34,197,94,0.35); border-radius: 9px; margin-top: 10px; font-size: 0.8rem; color: var(--green); font-weight: 500; animation: fadeUp 0.2s ease; }
+.conflict-ok-banner.show { display: flex; }
+
 @media(max-width:580px){
   header{padding:0 16px;} main{padding:28px 14px 80px;}
   .r3{grid-template-columns:1fr 1fr;} .r2{grid-template-columns:1fr;}
@@ -258,6 +279,26 @@ textarea { resize: vertical; min-height: 68px; }
     </button>
   </div>
 
+  <!-- Conflict Banner -->
+  <div class="conflict-banner" id="conflictBanner">
+    <div class="conflict-header">
+      <span class="conflict-header-ico">⚠️</span>
+      <span class="conflict-header-txt">この時間帯に予定があります</span>
+      <span class="conflict-header-sub" id="conflictHeaderSub"></span>
+    </div>
+    <div class="conflict-list" id="conflictList"></div>
+    <div class="conflict-actions">
+      <button class="conflict-btn-cancel" onclick="hideConflict()">キャンセル</button>
+      <button class="conflict-btn-proceed" onclick="proceedAnyway()">このまま作成する</button>
+    </div>
+  </div>
+
+  <!-- Conflict OK Banner -->
+  <div class="conflict-ok-banner" id="conflictOkBanner">
+    <span>✅</span>
+    <span>すべての日程で空きを確認しました</span>
+  </div>
+
   <!-- Progress -->
   <div class="prog" id="progCard">
     <div class="prog-lbl">
@@ -310,7 +351,7 @@ const ACCOUNTS = [
 ];
 
 const GCAL_CLIENT_ID = '187286115127-mhvei1kcpf9b9iq4p655adjn5h9ghdtb.apps.googleusercontent.com';
-const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.events';
+const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly';
 
 // ══════════════════════════════════════
 // STATE
@@ -592,9 +633,29 @@ async function doSubmit() {
   const recur = document.getElementById('fRecur').value;
   const recurEnd = document.getElementById('fRecurEnd').value;
 
-  // UI: loading
+  // ── 競合チェック ──
+  hideConflict();
+  document.getElementById('conflictOkBanner').classList.remove('show');
   const btn = document.getElementById('btnSubmit');
   btn.disabled = true;
+
+  let conflicts = [];
+  if (!S._skipConflictCheck) {
+    btn.innerHTML = '<div class="spinner"></div><span>空き確認中...</span>';
+    conflicts = await gcalCheckConflicts();
+  }
+  if (conflicts.length > 0) {
+    showConflict(conflicts);
+    btn.disabled = false;
+    btn.innerHTML = '<span>会議を作成</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    return;
+  }
+  // 空き確認OK表示（一瞬だけ）
+  document.getElementById('conflictOkBanner').classList.add('show');
+  await sleep(800);
+  document.getElementById('conflictOkBanner').classList.remove('show');
+
+  // UI: loading
   btn.innerHTML = '<div class="spinner"></div><span>処理中...</span>';
   document.getElementById('progCard').classList.add('show');
   document.getElementById('progFill').style.width = '5%';
@@ -722,6 +783,116 @@ async function createZoomMeeting(zoomCfg, title, date, start, end) {
   const meetData = await meetRes.json();
   if (!meetData.join_url) throw new Error('Zoom meeting failed: ' + JSON.stringify(meetData));
   return meetData.join_url;
+}
+
+// ══════════════════════════════════════
+// CONFLICT CHECK
+// ══════════════════════════════════════
+
+// 各スロットの時間帯をGoogle Calendar FreeBusy APIで確認
+async function gcalCheckConflicts() {
+  const items = S.slots.map(sid => {
+    const date  = document.getElementById('slot-date-'  + sid)?.value;
+    const start = document.getElementById('slot-start-' + sid)?.value;
+    const end   = document.getElementById('slot-end-'   + sid)?.value;
+    return { sid, date, start, end,
+      startISO: `${date}T${start}:00+09:00`,
+      endISO:   `${date}T${end}:00+09:00`
+    };
+  }).filter(it => it.date && it.start && it.end);
+
+  if (!items.length) return [];
+
+  // FreeBusy APIは1リクエストで複数時間帯を確認できる
+  // timeMinは全スロット中の最早、timeMaxは最遅
+  const allStarts = items.map(i => new Date(i.startISO).getTime());
+  const allEnds   = items.map(i => new Date(i.endISO).getTime());
+  const timeMin = new Date(Math.min(...allStarts)).toISOString();
+  const timeMax = new Date(Math.max(...allEnds)).toISOString();
+
+  let busyPeriods = [];
+  try {
+    const res = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        timeMin, timeMax,
+        timeZone: 'Asia/Tokyo',
+        items: [{ id: 'primary' }]
+      })
+    });
+    const data = await res.json();
+    busyPeriods = data?.calendars?.primary?.busy || [];
+  } catch(e) {
+    console.warn('FreeBusy API error:', e);
+    return []; // エラー時はスキップして続行
+  }
+
+  // 各スロットとbusyPeriodが重なるか確認
+  const conflicts = [];
+  for (const item of items) {
+    const slotStart = new Date(item.startISO).getTime();
+    const slotEnd   = new Date(item.endISO).getTime();
+    for (const busy of busyPeriods) {
+      const busyStart = new Date(busy.start).getTime();
+      const busyEnd   = new Date(busy.end).getTime();
+      if (slotStart < busyEnd && slotEnd > busyStart) {
+        conflicts.push({
+          sid: item.sid,
+          date: item.date,
+          slotStart: item.start,
+          slotEnd: item.end,
+          busyStart: new Date(busy.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' }),
+          busyEnd:   new Date(busy.end).toLocaleTimeString('ja-JP',   { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })
+        });
+      }
+    }
+  }
+  return conflicts;
+}
+
+function showConflict(conflicts) {
+  const banner = document.getElementById('conflictBanner');
+  const list   = document.getElementById('conflictList');
+  const sub    = document.getElementById('conflictHeaderSub');
+
+  sub.textContent = `${conflicts.length}件の競合`;
+
+  list.innerHTML = conflicts.map(c => {
+    const slotIdx = S.slots.indexOf(c.sid) + 1;
+    const dateStr = new Date(c.date + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' });
+    return `
+      <div class="conflict-item">
+        <span class="conflict-slot-tag">日程${slotIdx}</span>
+        <span class="conflict-event-name">${dateStr} ${c.slotStart}〜${c.slotEnd}</span>
+        <span class="conflict-event-time">${c.busyStart}〜${c.busyEnd} 予定あり</span>
+      </div>`;
+  }).join('');
+
+  banner.classList.add('show');
+  banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // 競合したスロットの枠を赤くハイライト
+  // 一旦全リセット
+  document.querySelectorAll('.slot-item').forEach(el => el.style.borderColor = '');
+  conflicts.forEach(c => {
+    const el = document.getElementById('slot-' + c.sid);
+    if (el) el.style.borderColor = 'rgba(239,68,68,0.6)';
+  });
+}
+
+function hideConflict() {
+  document.getElementById('conflictBanner').classList.remove('show');
+  document.querySelectorAll('.slot-item').forEach(el => el.style.borderColor = '');
+}
+
+// 競合を無視して強行
+async function proceedAnyway() {
+  hideConflict();
+  // 既存のdoSubmitの競合チェックをスキップして直接実行
+  S._skipConflictCheck = true;
+  await doSubmit();
+  S._skipConflictCheck = false;
 }
 
 // ══════════════════════════════════════
